@@ -1,0 +1,142 @@
+---
+import { journey } from "../data/journey";
+import { site } from "../data/site";
+---
+
+<section id="about" class="section section--calm journey" aria-labelledby="journey-title">
+  <div class="container journey-grid">
+    <div class="journey-story">
+      <p class="eyebrow"><span class="num">05</span> / The journey</p>
+      <h2 id="journey-title" class="section-title">
+        {journey.headline} <span class="accent">{journey.headlineAccent}</span>
+      </h2>
+      <p class="lede">{journey.story}</p>
+      {site.cvUrl && (
+        <a class="text-link" href={site.cvUrl} target="_blank" rel="noopener">
+          View full CV <span aria-hidden="true">↗</span>
+          <span class="visually-hidden">(opens in a new tab)</span>
+        </a>
+      )}
+    </div>
+
+    <!-- PORT-003: line extends downward and entries appear in sequence. -->
+    <ol class="timeline" role="list" data-timeline>
+      {journey.entries.map((entry) => (
+        <li class:list={["entry", { "is-current": entry.current }]}>
+          <span class="entry-node" aria-hidden="true"></span>
+          <p class="entry-dates mono">{entry.dates}</p>
+          <h3 class="entry-role">{entry.role}</h3>
+          <p class="entry-org">{entry.organisation}</p>
+          <p class="entry-summary">{entry.summary}</p>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>
+
+<style>
+  .journey-grid {
+    display: grid;
+    gap: var(--space-3xl);
+  }
+
+  .journey-story {
+    display: grid;
+    align-content: start;
+    justify-items: start;
+    gap: var(--space-lg);
+  }
+
+  .journey-story .text-link {
+    margin-top: var(--space-md);
+  }
+
+  .timeline {
+    position: relative;
+    display: grid;
+    gap: clamp(var(--space-xl), 3vw, 2.75rem);
+    padding-left: 2.5rem;
+  }
+
+  /* The vertical rule. */
+  .timeline::before {
+    content: "";
+    position: absolute;
+    top: 0.45rem;
+    bottom: 0.45rem;
+    left: 0.4375rem;
+    width: 1px;
+    background: linear-gradient(180deg, var(--signal) 0%, var(--border-default) 22%, var(--border-default) 100%);
+  }
+
+  .entry {
+    position: relative;
+  }
+
+  .entry-node {
+    position: absolute;
+    top: 0.2rem;
+    left: -2.5rem;
+    width: 0.875rem;
+    height: 0.875rem;
+    border: 1px solid var(--artifact);
+    border-radius: 50%;
+    background: var(--aether-deep);
+  }
+
+  .entry-node::after {
+    content: "";
+    position: absolute;
+    inset: 3px;
+    border-radius: 50%;
+    background: var(--artifact);
+  }
+
+  .entry.is-current .entry-node {
+    border-color: var(--signal);
+    box-shadow: 0 0 0 4px var(--signal-soft);
+  }
+
+  .entry.is-current .entry-node::after {
+    background: var(--signal);
+  }
+
+  .entry-dates {
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+  }
+
+  .entry.is-current .entry-dates {
+    color: var(--signal);
+  }
+
+  .entry-role {
+    margin-top: var(--space-xs);
+    font-size: var(--text-xl);
+  }
+
+  .entry-org {
+    margin-top: 0.15rem;
+    color: var(--artifact);
+    font-size: var(--text-sm);
+  }
+
+  .entry-summary {
+    margin-top: var(--space-sm);
+    max-width: 46ch;
+    color: var(--text-secondary);
+    font-size: 0.9375rem;
+  }
+
+  @media (min-width: 1024px) {
+    .journey-grid {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+      gap: clamp(4rem, 8vw, 8rem);
+    }
+
+    .journey-story {
+      position: sticky;
+      top: var(--space-3xl);
+    }
+  }
+</style>

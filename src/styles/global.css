@@ -305,7 +305,8 @@ p {
 
 .section {
   position: relative;
-  padding-block: var(--section-space);
+  /* Half on each side, so adjacent sections sit one --section-space apart. */
+  padding-block: calc(var(--section-space) / 2);
 }
 
 /* Calm canvas for sections 02–07: a barely-there tonal shift, no decoration. */
