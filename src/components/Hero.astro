@@ -550,11 +550,13 @@ const edges: [number, number, number, number][] = [
   }
 
   /*
-   * The chart is scaled to cover the hero, so on narrower or taller-than-3:2
-   * windows it grows and slides left under the copy. There, the nodes nearest
-   * the copy (and their labels) are hidden rather than sitting behind text.
+   * The chart is scaled to cover the hero, so on narrower windows it grows and
+   * slides left under the copy. Below this width the two nodes nearest the copy
+   * (Data Engineering, Analytical Products) and the triangle marker are hidden.
+   *
+   * TUNE HERE: nodes appear from 1500px wide. Change 1499px to move the cut-off.
    */
-  @media (max-width: 1279px), (max-aspect-ratio: 3/2) {
+  @media (max-width: 1499px) {
     .atlas-near-copy {
       display: none;
     }
