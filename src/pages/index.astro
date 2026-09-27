@@ -1,0 +1,49 @@
+---
+import "../styles/global.css";
+import Nav from "../components/Nav.astro";
+import { site, withBase } from "../data/site";
+
+const canonical = new URL(Astro.url.pathname, Astro.site);
+// TODO(PORT-004): add a real social preview image at /og.png and set this.
+const ogImage: string | undefined = undefined;
+---
+
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{site.title}</title>
+    <meta name="description" content={site.description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href={withBase("/favicon.svg")} />
+    <meta name="theme-color" content="#05070c" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={site.title} />
+    <meta property="og:description" content={site.description} />
+    <meta property="og:url" content={canonical} />
+    {ogImage && <meta property="og:image" content={new URL(withBase(ogImage), Astro.site)} />}
+    <meta name="twitter:card" content={ogImage ? "summary_large_image" : "summary"} />
+  </head>
+  <body id="top">
+    <a class="skip-link" href="#main">Skip to content</a>
+    <Nav />
+    <main id="main">
+      <!-- PORT-001 shell: section anchors only. PORT-002 fills each section. -->
+      <section class="section" aria-labelledby="hero-title" style="min-height: 100vh; display: grid; align-items: center;">
+        <div class="container">
+          <p class="mono" style="color: var(--text-secondary)">Hello, I'm</p>
+          <h1 id="hero-title" style="font-size: var(--text-4xl); margin-block: 1rem 1.5rem;">{site.name}</h1>
+          <p class="lede">Mapping complex systems into products people can <span class="accent">use.</span></p>
+        </div>
+      </section>
+      <section id="work" class="section section--calm" aria-label="Selected work"><div class="container"><p class="eyebrow"><span class="num">02</span> / Selected work</p></div></section>
+      <section id="pipeline" class="section section--calm" aria-label="Under the interface"><div class="container"><p class="eyebrow"><span class="num">03</span> / Under the interface</p></div></section>
+      <section id="capabilities" class="section section--calm" aria-label="What I build"><div class="container"><p class="eyebrow"><span class="num">04</span> / What I build</p></div></section>
+      <section id="about" class="section section--calm" aria-label="The journey"><div class="container"><p class="eyebrow"><span class="num">05</span> / The journey</p></div></section>
+      <section id="projects" class="section section--calm" aria-label="Project atlas"><div class="container"><p class="eyebrow"><span class="num">06</span> / Project atlas</p></div></section>
+    </main>
+    <footer id="contact" class="section section--calm"><div class="container"><p class="eyebrow"><span class="num">07</span> / Contact</p></div></footer>
+  </body>
+</html>
