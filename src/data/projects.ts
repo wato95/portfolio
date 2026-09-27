@@ -115,7 +115,7 @@ export const projects: Project[] = [
     slug: "mythology-network",
     number: "03",
     // TODO(PORT-004): confirm final public name.
-    name: "Mythology Network",
+    name: "Olympian network explorer",
     description:
       "An interactive knowledge graph of Greek mythology where every relationship carries its source, so conflicting traditions stay visible rather than flattened.",
     status: "building",
