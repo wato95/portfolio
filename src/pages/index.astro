@@ -1,6 +1,13 @@
 ---
 import "../styles/global.css";
 import Nav from "../components/Nav.astro";
+import Hero from "../components/Hero.astro";
+import SelectedWork from "../components/SelectedWork.astro";
+import Pipeline from "../components/Pipeline.astro";
+import Capabilities from "../components/Capabilities.astro";
+import Journey from "../components/Journey.astro";
+import ProjectAtlas from "../components/ProjectAtlas.astro";
+import Footer from "../components/Footer.astro";
 import { site, withBase } from "../data/site";
 
 const canonical = new URL(Astro.url.pathname, Astro.site);
@@ -30,20 +37,13 @@ const ogImage: string | undefined = undefined;
     <a class="skip-link" href="#main">Skip to content</a>
     <Nav />
     <main id="main">
-      <!-- PORT-001 shell: section anchors only. PORT-002 fills each section. -->
-      <section class="section" aria-labelledby="hero-title" style="min-height: 100vh; display: grid; align-items: center;">
-        <div class="container">
-          <p class="mono" style="color: var(--text-secondary)">Hello, I'm</p>
-          <h1 id="hero-title" style="font-size: var(--text-4xl); margin-block: 1rem 1.5rem;">{site.name}</h1>
-          <p class="lede">Mapping complex systems into products people can <span class="accent">use.</span></p>
-        </div>
-      </section>
-      <section id="work" class="section section--calm" aria-label="Selected work"><div class="container"><p class="eyebrow"><span class="num">02</span> / Selected work</p></div></section>
-      <section id="pipeline" class="section section--calm" aria-label="Under the interface"><div class="container"><p class="eyebrow"><span class="num">03</span> / Under the interface</p></div></section>
-      <section id="capabilities" class="section section--calm" aria-label="What I build"><div class="container"><p class="eyebrow"><span class="num">04</span> / What I build</p></div></section>
-      <section id="about" class="section section--calm" aria-label="The journey"><div class="container"><p class="eyebrow"><span class="num">05</span> / The journey</p></div></section>
-      <section id="projects" class="section section--calm" aria-label="Project atlas"><div class="container"><p class="eyebrow"><span class="num">06</span> / Project atlas</p></div></section>
+      <Hero />
+      <SelectedWork />
+      <Pipeline />
+      <Capabilities />
+      <Journey />
+      <ProjectAtlas />
     </main>
-    <footer id="contact" class="section section--calm"><div class="container"><p class="eyebrow"><span class="num">07</span> / Contact</p></div></footer>
+    <Footer />
   </body>
 </html>

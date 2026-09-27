@@ -1,0 +1,195 @@
+---
+import { site } from "../data/site";
+
+// Only links with a real destination render (spec §19.3).
+const links = [
+  { label: "GitHub", href: site.githubUrl, rel: "me noopener" },
+  { label: "LinkedIn", href: site.linkedinUrl, rel: "me noopener" },
+  { label: "Email", href: site.email && `mailto:${site.email}` },
+  { label: "CV / Résumé", href: site.cvUrl, rel: "noopener" },
+].filter((link): link is { label: string; href: string; rel?: string } => Boolean(link.href));
+
+const year = new Date().getFullYear();
+---
+
+<footer id="contact" class="section section--calm contact" aria-labelledby="contact-title">
+  <!-- The one quiet echo of the Hero atlas (spec §16.4). -->
+  <svg class="orbit" viewBox="0 0 600 700" aria-hidden="true" focusable="false">
+    <g fill="none" stroke="#8fb4cc" stroke-width="1">
+      <circle cx="560" cy="330" r="120" opacity="0.14" stroke-dasharray="3 6" />
+      <circle cx="560" cy="330" r="220" opacity="0.12" />
+      <circle cx="560" cy="330" r="320" opacity="0.08" stroke-dasharray="2 8" />
+      <path d="M260 190 560 330 380 560" opacity="0.1" />
+    </g>
+    <path d="M318 130A320 320 0 0 0 250 290" fill="none" stroke="#b69a69" stroke-width="1" stroke-dasharray="4 5" opacity="0.4" />
+    <circle cx="560" cy="330" r="12" fill="none" stroke="#b69a69" opacity="0.4" />
+    <circle cx="560" cy="330" r="5" fill="#b69a69" opacity="0.6" />
+    <circle cx="340" cy="110" r="4" fill="#b69a69" opacity="0.55" />
+    <circle cx="378" cy="455" r="2.5" fill="#5ed8ff" opacity="0.5" />
+    <circle cx="430" cy="160" r="1.8" fill="#c9d6e2" opacity="0.4" />
+  </svg>
+
+  <div class="container">
+    <div class="contact-grid">
+      <div class="contact-statement">
+        <p class="eyebrow"><span class="num">07</span> / Contact</p>
+        <p class="contact-kicker">Get in touch <span aria-hidden="true">/</span></p>
+        <h2 id="contact-title" class="contact-title">
+          Let’s talk about data, systems or something that <span class="accent">needs a map</span>.
+        </h2>
+      </div>
+
+      <nav class="contact-links" aria-labelledby="contact-links-title">
+        <p id="contact-links-title" class="contact-links-title mono">Find me online</p>
+        <ul role="list">
+          {links.map((link) => (
+            <li>
+              <a href={link.href} rel={link.rel} target={link.href.startsWith("mailto:") ? undefined : "_blank"}>
+                <span>{link.label}</span>
+                <span class="contact-arrow" aria-hidden="true">↗</span>
+                {!link.href.startsWith("mailto:") && <span class="visually-hidden">(opens in a new tab)</span>}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </div>
+
+    <div class="contact-base">
+      <p>© {year} {site.name}</p>
+      <a class="to-top" href="#top">Back to top <span aria-hidden="true">↑</span></a>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .contact {
+    overflow: hidden;
+    padding-bottom: var(--space-xl);
+  }
+
+  .orbit {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    width: min(40vw, 600px);
+    height: auto;
+    transform: translateY(-58%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .contact .container {
+    position: relative;
+    z-index: 1;
+  }
+
+  .contact-grid {
+    display: grid;
+    gap: var(--space-3xl);
+    padding-top: var(--space-xl);
+  }
+
+  .contact-kicker {
+    margin-top: var(--space-2xl);
+    font-family: var(--font-editorial);
+    font-style: italic;
+    font-size: var(--text-xl);
+    color: var(--artifact);
+  }
+
+  .contact-kicker span {
+    margin-left: 0.6rem;
+    color: var(--text-muted);
+  }
+
+  .contact-title {
+    margin-top: var(--space-md);
+    max-width: 13ch;
+    font-family: var(--font-editorial);
+    font-size: clamp(2.75rem, 5.4vw, 4.75rem);
+    font-weight: 400;
+    line-height: 1.04;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+  }
+
+  .contact-links {
+    align-self: end;
+    width: 100%;
+    max-width: 22rem;
+  }
+
+  .contact-links-title {
+    color: var(--text-secondary);
+    letter-spacing: 0.18em;
+  }
+
+  .contact-links ul {
+    margin-top: var(--space-md);
+  }
+
+  .contact-links a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-block: 1.1rem;
+    border-bottom: 1px solid var(--border-default);
+    font-weight: 500;
+    transition:
+      color var(--motion-ui) var(--ease-out),
+      border-color var(--motion-ui) var(--ease-out);
+  }
+
+  .contact-links a:hover {
+    color: var(--signal);
+    border-color: rgba(94, 216, 255, 0.4);
+  }
+
+  .contact-arrow {
+    color: var(--text-secondary);
+  }
+
+  .contact-links a:hover .contact-arrow {
+    color: var(--signal);
+  }
+
+  .contact-base {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+    margin-top: clamp(4rem, 9vw, 7.5rem);
+    padding-top: var(--space-lg);
+    border-top: 1px solid var(--border-default);
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+  }
+
+  .to-top {
+    padding: 0.25rem 0;
+    transition: color var(--motion-ui) var(--ease-out);
+  }
+
+  .to-top:hover {
+    color: var(--signal);
+  }
+
+  /* Mobile: the orbit is largely clipped away. */
+  @media (max-width: 719px) {
+    .orbit {
+      top: 0;
+      width: 70vw;
+      transform: translate(35%, -10%);
+      opacity: 0.6;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .contact-grid {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
+      padding-right: clamp(0rem, 12vw, 12rem);
+    }
+  }
+</style>

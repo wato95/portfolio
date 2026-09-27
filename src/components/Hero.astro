@@ -1,0 +1,458 @@
+---
+import { site } from "../data/site";
+
+const [firstName, ...rest] = site.name.split(" ");
+const lastName = rest.join(" ");
+
+// ---------------------------------------------------------------------------
+// Atlas composition, generated once at build time into a static inline SVG.
+// Deterministic (seeded) so every build produces the same chart.
+// Canvas: 1440 × 900, anchored right; the copy sits over the sparse left side.
+// ---------------------------------------------------------------------------
+
+let seed = 7;
+const rand = () => {
+  seed = (seed * 16807) % 2147483647;
+  return (seed - 1) / 2147483646;
+};
+
+const round = (n: number) => Math.round(n * 10) / 10;
+
+// Contour "landmass": perturbed rings around one centre, like a relief map.
+const contourCentre = { x: 1150, y: 480 };
+const contours = Array.from({ length: 7 }, (_, i) => {
+  const base = 70 + i * 34;
+  const phase = i * 0.55;
+  const points = Array.from({ length: 72 }, (_, k) => {
+    const a = (k / 72) * Math.PI * 2;
+    const r =
+      base *
+      (1 +
+        0.16 * Math.sin(3 * a + phase) +
+        0.09 * Math.cos(5 * a - phase * 1.3) +
+        0.05 * Math.sin(8 * a + i));
+    return `${round(contourCentre.x + r * Math.cos(a) * 1.25)},${round(contourCentre.y + r * Math.sin(a) * 0.82)}`;
+  });
+  return `M${points.join("L")}Z`;
+});
+
+// Star field, weighted toward the right so the copy area stays quiet.
+const stars = Array.from({ length: 150 }, () => {
+  const x = 1440 * Math.pow(rand(), 0.55); // skews toward larger x
+  const y = 900 * rand();
+  const r = rand() < 0.08 ? 1.3 : 0.7;
+  const o = round(0.25 + rand() * 0.5);
+  return { x: round(x), y: round(y), r, o };
+});
+
+// Constellation: capability nodes (Signal) + waypoint nodes (neutral/Artifact).
+const hub = { x: 1010, y: 370 };
+const nodes = [
+  { id: "de", x: 760, y: 190, label: "Data", label2: "Engineering", left: true },
+  { id: "geo", x: 1250, y: 170, label: "Geospatial", label2: "Systems", left: false },
+  { id: "ap", x: 780, y: 500, label: "Analytical", label2: "Products", left: true },
+  { id: "ii", x: 1300, y: 560, label: "Interactive", label2: "Interfaces", left: false },
+] as const;
+
+const waypoints = [
+  { x: 890, y: 270 },
+  { x: 1160, y: 265 },
+  { x: 1190, y: 120 },
+  { x: 1120, y: 480 },
+  { x: 1215, y: 640 },
+  { x: 1040, y: 610 },
+  { x: 1370, y: 410, artifact: true },
+  { x: 880, y: 650, artifact: true },
+  { x: 1390, y: 720, artifact: true },
+];
+
+// Edges drawn as straight chart lines; a few arcs render as routes.
+const edges: [number, number, number, number][] = [
+  [hub.x, hub.y, 760, 190],
+  [hub.x, hub.y, 1160, 265],
+  [1160, 265, 1250, 170],
+  [hub.x, hub.y, 880, 650],
+  [890, 270, 780, 500],
+  [1190, 120, 1300, 560],
+  [1120, 480, 1215, 640],
+];
+---
+
+<section class="hero" aria-labelledby="hero-name">
+  <svg
+    class="atlas"
+    viewBox="0 0 1440 900"
+    preserveAspectRatio="xMaxYMid slice"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <defs>
+      <radialGradient id="atlas-glow" cx="0.72" cy="0.45" r="0.5">
+        <stop offset="0" stop-color="#0f2233" stop-opacity="0.9" />
+        <stop offset="1" stop-color="#05070c" stop-opacity="0" />
+      </radialGradient>
+    </defs>
+
+    <rect width="1440" height="900" fill="url(#atlas-glow)" />
+
+    <g>
+      <!-- Stars -->
+      <g class="atlas-detail atlas-stars">
+        {stars.map((s) => <circle cx={s.x} cy={s.y} r={s.r} fill="#c9d6e2" opacity={s.o} />)}
+      </g>
+
+      <!-- Relief contours -->
+      <g class="atlas-detail" fill="none" stroke="#b69a69" stroke-width="0.8">
+        {contours.map((d, i) => <path d={d} opacity={round(0.1 + i * 0.022)} />)}
+      </g>
+
+      <!-- Orbital geometry -->
+      <g fill="none" stroke="#8fb4cc" stroke-width="0.8">
+        <circle cx={hub.x} cy={hub.y} r="180" opacity="0.1" />
+        <circle cx={hub.x} cy={hub.y} r="320" opacity="0.12" stroke-dasharray="2 6" />
+        <circle cx={hub.x} cy={hub.y} r="470" opacity="0.09" />
+        <circle cx={hub.x} cy={hub.y} r="640" opacity="0.07" stroke-dasharray="1 8" />
+        <ellipse
+          cx={hub.x + 60}
+          cy={hub.y + 60}
+          rx="560"
+          ry="250"
+          transform={`rotate(-14 ${hub.x + 60} ${hub.y + 60})`}
+          opacity="0.1"
+        />
+        <!-- Meridians -->
+        <path d={`M${hub.x} ${hub.y - 640}V${hub.y + 640}`} opacity="0.06" />
+        <path d={`M${hub.x - 640} ${hub.y}H${hub.x + 640}`} opacity="0.06" />
+        <path d={`M${hub.x - 450} ${hub.y - 450}L${hub.x + 450} ${hub.y + 450}`} opacity="0.05" />
+      </g>
+
+      <!-- Routes (Artifact) -->
+      <g fill="none" stroke="#b69a69" stroke-width="0.9" stroke-dasharray="3 5" opacity="0.45">
+        <path d={`M${hub.x} ${hub.y}Q1170 600 1300 560`} />
+        <path d="M700 660Q670 400 760 190" opacity="0.6" />
+      </g>
+
+      <!-- Network edges -->
+      <g stroke="#5ed8ff" stroke-width="0.8" opacity="0.28">
+        {edges.map(([x1, y1, x2, y2]) => <line x1={x1} y1={y1} x2={x2} y2={y2} />)}
+      </g>
+
+      <!-- Waypoints -->
+      <g>
+        {waypoints.map((w) =>
+          w.artifact ? (
+            <g>
+              <circle cx={w.x} cy={w.y} r="7" fill="none" stroke="#b69a69" stroke-width="0.8" opacity="0.6" />
+              <circle cx={w.x} cy={w.y} r="2" fill="#b69a69" />
+            </g>
+          ) : (
+            <circle cx={w.x} cy={w.y} r="2.2" fill="#c9d6e2" opacity="0.7" />
+          ),
+        )}
+      </g>
+
+      <!-- Hub -->
+      <g class="atlas-hub">
+        <circle cx={hub.x} cy={hub.y} r="34" fill="none" stroke="#5ed8ff" stroke-width="0.6" opacity="0.18" />
+        <circle cx={hub.x} cy={hub.y} r="20" fill="none" stroke="#5ed8ff" stroke-width="0.8" opacity="0.35" />
+        <circle cx={hub.x} cy={hub.y} r="10" fill="#5ed8ff" opacity="0.15" />
+        <circle cx={hub.x} cy={hub.y} r="4" fill="#5ed8ff" />
+      </g>
+
+      <!-- Capability nodes -->
+      <g>
+        {nodes.map((n) => (
+          <g class="atlas-node">
+            <circle cx={n.x} cy={n.y} r="11" fill="#5ed8ff" opacity="0.12" />
+            <circle cx={n.x} cy={n.y} r="3.4" fill="#5ed8ff" />
+            <text x={n.x + 26} y={n.y - 4} class:list={["atlas-label", { "atlas-near-copy": n.left }]}>
+              <tspan>{n.label}</tspan>
+              <tspan x={n.x + 26} dy="18">{n.label2}</tspan>
+            </text>
+          </g>
+        ))}
+      </g>
+
+      <!-- Chart notation -->
+      <g class="atlas-detail">
+        <text x="1170" y="380" class="atlas-notation" text-anchor="middle">
+          <tspan>A T L A S</tspan>
+          <tspan x="1170" dy="21">O F</tspan>
+          <tspan x="1170" dy="21">P R O J E C T S</tspan>
+        </text>
+        <text x="1100" y="770" class="atlas-notation atlas-notation--quiet" text-anchor="middle">
+          <tspan>T H E</tspan>
+          <tspan x="1100" dy="20">D A T A</tspan>
+          <tspan x="1100" dy="20">S E A</tspan>
+        </text>
+        <path class="atlas-near-copy" d="M660 360L672 382H648Z" fill="none" stroke="#b69a69" stroke-width="1" opacity="0.8" />
+      </g>
+
+      <!-- Far-right body (a planet at the chart's edge) -->
+      <g class="atlas-detail">
+        <circle cx="1470" cy="215" r="58" fill="#0a1019" stroke="#b69a69" stroke-width="0.8" opacity="0.8" />
+        <path d="M1418 190A58 58 0 0 1 1452 160" fill="none" stroke="#d8c29a" stroke-width="1.4" opacity="0.7" />
+      </g>
+    </g>
+  </svg>
+
+  <div class="hero-inner container">
+    <div class="hero-copy">
+      <p class="hero-hello mono">Hello, I'm</p>
+      <h1 id="hero-name" class="hero-name">
+        <span class="hero-first">{firstName}</span>{" "}
+        {lastName && <span class="hero-last">{lastName}</span>}
+      </h1>
+
+      <p class="hero-headline">
+        <span class="hero-line">Mapping complex systems</span>{" "}
+        into products <span class="accent">people can use.</span>
+      </p>
+      <p class="hero-support">
+        Data engineering, analytical products and interactive interfaces built around real-world
+        data.
+      </p>
+
+      <div class="hero-actions">
+        <a class="btn btn--primary" href="#work">
+          Explore work <span aria-hidden="true">↓</span>
+        </a>
+        {site.githubUrl && (
+          <a class="btn" href={site.githubUrl} target="_blank" rel="me noopener">
+            GitHub <span aria-hidden="true">↗</span>
+            <span class="visually-hidden">(opens in a new tab)</span>
+          </a>
+        )}
+      </div>
+
+      <div class="hero-tools">
+        <p class="hero-tools-label mono">Tools &amp; technologies</p>
+        <ul role="list" class="hero-tools-list">
+          {site.heroTools.map((tool) => <li>{tool}</li>)}
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <p class="hero-motto mono" aria-hidden="true">
+    <span class="hero-motto-arrow"></span>
+    <span>Explore<br />Build<br />Iterate</span>
+  </p>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    align-items: center;
+    min-height: max(100svh, 44rem);
+    padding-block: 8.5rem 5rem;
+    overflow: hidden;
+    background: var(--aether-void);
+  }
+
+  /* Blend the hero into the calm canvas below. */
+  .hero::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0;
+    height: 9rem;
+    background: linear-gradient(180deg, transparent, var(--aether-deep));
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  .atlas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -2;
+    max-width: none;
+    /* Contrast model in screen space: very low behind copy → medium far right. */
+    -webkit-mask-image: linear-gradient(90deg, rgb(0 0 0 / 0.12) 0%, rgb(0 0 0 / 0.3) 32%, rgb(0 0 0 / 0.8) 58%, #000 100%);
+    mask-image: linear-gradient(90deg, rgb(0 0 0 / 0.12) 0%, rgb(0 0 0 / 0.3) 32%, rgb(0 0 0 / 0.8) 58%, #000 100%);
+  }
+
+  .atlas-label {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    fill: #b9c7d4;
+  }
+
+  .atlas-notation {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    fill: var(--artifact);
+    opacity: 0.8;
+  }
+
+  .atlas-notation--quiet {
+    fill: #7d8b98;
+    opacity: 0.6;
+  }
+
+  .hero-copy {
+    max-width: 40rem;
+  }
+
+  .hero-hello {
+    color: var(--text-secondary);
+    letter-spacing: 0.3em;
+  }
+
+  .hero-name {
+    display: grid;
+    margin-block: var(--space-md) var(--space-xl);
+    font-size: var(--text-4xl);
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    text-transform: uppercase;
+  }
+
+  .hero-first {
+    font-weight: 700;
+  }
+
+  .hero-last {
+    font-weight: 250;
+    letter-spacing: -0.02em;
+  }
+
+  .hero-headline {
+    position: relative;
+    font-size: clamp(1.75rem, 2.9vw, 2.625rem);
+    font-weight: 500;
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+    max-width: 22ch;
+  }
+
+  /* Artifact tick marking the headline, like a chart callout. */
+  .hero-headline::before {
+    content: "";
+    position: absolute;
+    top: 0.6em;
+    right: calc(100% + 1.5rem);
+    width: 2.25rem;
+    height: 1px;
+    background: var(--artifact);
+  }
+
+  @media (min-width: 720px) {
+    .hero-line {
+      display: block;
+    }
+  }
+
+  .hero-headline .accent {
+    font-size: 1.1em;
+    line-height: 1;
+  }
+
+  .hero-support {
+    margin-top: var(--space-lg);
+    max-width: 36rem;
+    color: var(--text-secondary);
+    font-size: clamp(var(--text-base), 1.3vw, 1.1875rem);
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-md);
+    margin-top: var(--space-2xl);
+  }
+
+  .hero-tools {
+    margin-top: clamp(var(--space-2xl), 6vh, 4.5rem);
+  }
+
+  .hero-tools-label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    color: var(--text-muted);
+    letter-spacing: 0.22em;
+  }
+
+  .hero-tools-label::after {
+    content: "";
+    width: 3rem;
+    height: 1px;
+    background: var(--border-default);
+  }
+
+  .hero-tools-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 0;
+    margin-top: var(--space-md);
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+  }
+
+  .hero-tools-list li:not(:last-child)::after {
+    content: "·";
+    margin-inline: 0.7rem;
+    color: var(--artifact);
+  }
+
+  .hero-motto {
+    display: none;
+    position: absolute;
+    right: var(--gutter);
+    bottom: 3.5rem;
+    align-items: flex-start;
+    gap: var(--space-md);
+    color: var(--artifact);
+    font-size: 0.6875rem;
+    letter-spacing: 0.24em;
+    line-height: 1.75;
+  }
+
+  .hero-motto-arrow {
+    width: 1.75rem;
+    height: 1px;
+    margin-top: 0.85em;
+    background: var(--artifact);
+  }
+
+  /* Mobile: copy first, a cropped quiet fragment of the chart behind it. */
+  @media (max-width: 719px) {
+    .hero {
+      align-items: start;
+      padding-block: 7.5rem 4.5rem;
+    }
+
+    .atlas {
+      opacity: 0.7;
+      -webkit-mask-image: radial-gradient(circle at 100% 12%, #000 0%, rgb(0 0 0 / 0.35) 45%, transparent 80%);
+      mask-image: radial-gradient(circle at 100% 12%, #000 0%, rgb(0 0 0 / 0.35) 45%, transparent 80%);
+    }
+
+    .atlas-detail,
+    .atlas-label {
+      display: none;
+    }
+
+    .hero-headline::before {
+      display: none;
+    }
+  }
+
+  /* Until the canvas is wide enough, labels near the copy would collide with it. */
+  @media (max-width: 1279px) {
+    .atlas-near-copy {
+      display: none;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .hero-motto {
+      display: flex;
+    }
+  }
+</style>

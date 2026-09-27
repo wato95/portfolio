@@ -1,0 +1,338 @@
+---
+import { atlasFilters, projects, statusLabels, statusTone, type Project } from "../data/projects";
+import { withBase } from "../data/site";
+
+const filters = atlasFilters();
+
+// Where a tile's open affordance goes: case study first, then live, then code.
+const tileHref = (p: Project) => p.caseStudyUrl ?? p.liveUrl ?? p.githubUrl;
+const isExternal = (href: string) => /^https?:/.test(href);
+
+// Designed schematic glyphs for projects without real product imagery
+// (spec §23.2: no fake application screenshots). Seeded → stable builds.
+let seed = 11;
+const rand = () => {
+  seed = (seed * 16807) % 2147483647;
+  return (seed - 1) / 2147483646;
+};
+const r1 = (n: number) => Math.round(n * 10) / 10;
+
+const series = (amp: number, drift: number) =>
+  Array.from({ length: 60 }, (_, i) => {
+    const x = (i / 59) * 400;
+    const y = 90 - drift * (i / 59) - amp * (Math.sin(i / 3.2) * 0.5 + rand() * 0.9);
+    return `${i ? "L" : "M"}${r1(x)},${r1(y)}`;
+  }).join("");
+
+const gridLine = series(34, 28);
+const gridLine2 = series(16, 6);
+
+const graphNodes = Array.from({ length: 14 }, () => ({
+  x: r1(30 + rand() * 340),
+  y: r1(18 + rand() * 104),
+  big: rand() < 0.3,
+}));
+const graphEdges = graphNodes.flatMap((a, i) =>
+  graphNodes
+    .slice(i + 1)
+    .filter((b) => Math.hypot(a.x - b.x, a.y - b.y) < 95)
+    .map((b) => [a.x, a.y, b.x, b.y]),
+);
+
+const embers = Array.from({ length: 70 }, () => {
+  const cx = 150 + (rand() - 0.5) * 220;
+  const cy = 70 + (rand() - 0.5) * 90;
+  return { x: r1(cx), y: r1(cy), r: r1(0.6 + rand() * 2.2), o: r1(0.3 + rand() * 0.6) };
+});
+
+const riverLines = Array.from({ length: 9 }, (_, k) => {
+  const off = (k - 4) * 11;
+  return Array.from({ length: 41 }, (_, i) => {
+    const x = i * 10;
+    const y = 70 + off + 22 * Math.sin(i / 5 + k * 0.15) + 8 * Math.sin(i / 2.3);
+    return `${i ? "L" : "M"}${x},${r1(y)}`;
+  }).join("");
+});
+---
+
+<section id="projects" class="section section--calm atlas-section" aria-labelledby="atlas-title">
+  <div class="container">
+    <header class="atlas-head">
+      <div>
+        <h2 id="atlas-title" class="eyebrow"><span class="num">06</span> / Project atlas</h2>
+        <p class="atlas-sub">All projects with filtering and overview</p>
+      </div>
+      <!-- "View as list →" stays hidden until a list view or /projects route exists. -->
+    </header>
+
+    <!--
+      Filters are derived from projects.ts categories. PORT-003 turns these
+      into toggle buttons that filter the grid via data-categories.
+    -->
+    <ul class="filters" role="list" aria-label="Project categories" data-atlas-filters>
+      <li class="filter is-active" data-filter="all">All</li>
+      {filters.map(({ category, label }) => (
+        <li class="filter" data-filter={category}>{label}</li>
+      ))}
+    </ul>
+
+    <ul class="tiles" role="list" data-atlas-grid>
+      {projects.map((project) => {
+        const href = tileHref(project);
+        return (
+          <li class="tile" data-categories={project.categories.join("|")}>
+            <article class:list={["tile-card", { "has-link": href }]}>
+              <div class="tile-media" aria-hidden="true">
+                {project.thumbnail ? (
+                  <img src={withBase(project.thumbnail)} alt="" width="720" height="240" loading="lazy" decoding="async" />
+                ) : (
+                  <svg viewBox="0 0 400 140" preserveAspectRatio="xMidYMid slice">
+                    {project.slug === "gridpulse-bm" && (
+                      <g fill="none">
+                        {[30, 60, 90, 120].map((y) => <path d={`M0 ${y}H400`} stroke="#1a2636" stroke-dasharray="2 4" />)}
+                        <path d={gridLine2} stroke="#9aa8b7" stroke-width="1" opacity="0.55" />
+                        <path d={gridLine} stroke="#5ed8ff" stroke-width="1.3" />
+                      </g>
+                    )}
+                    {project.slug === "mythology-network" && (
+                      <g>
+                        {graphEdges.map(([x1, y1, x2, y2]) => <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="#b69a69" stroke-width="0.7" opacity="0.45" />)}
+                        {graphNodes.map((n) => n.big
+                          ? <><circle cx={n.x} cy={n.y} r="9" fill="#b69a69" opacity="0.18" /><circle cx={n.x} cy={n.y} r="3.5" fill="#d8b979" /></>
+                          : <circle cx={n.x} cy={n.y} r="2.2" fill="#5ed8ff" />)}
+                      </g>
+                    )}
+                    {project.slug === "pulsefoundry" && (
+                      <g fill="none" stroke="#5ed8ff" stroke-width="1">
+                        <g stroke-opacity="0.45">
+                          <path d="M0 78H40M88 78h26V34h40M114 78v24h60M202 34h44v32h14M222 102h38V78M310 78h30M340 78V40h16M340 78v38h16" stroke-dasharray="3 3" />
+                        </g>
+                        <g fill="#0f1b2a">
+                          <rect x="40" y="66" width="48" height="24" rx="5" />
+                          <rect x="154" y="22" width="48" height="24" rx="5" />
+                          <rect x="174" y="90" width="48" height="24" rx="5" />
+                          <rect x="260" y="66" width="50" height="24" rx="5" stroke="#b69a69" />
+                          <rect x="356" y="28" width="40" height="24" rx="5" />
+                          <rect x="356" y="104" width="40" height="24" rx="5" />
+                        </g>
+                      </g>
+                    )}
+                    {project.slug === "firewatch" && (
+                      <g>
+                        <path d="M20 110C80 60 120 120 180 70S300 40 390 90" fill="none" stroke="#b69a69" stroke-width="0.8" opacity="0.35" />
+                        <path d="M20 125C90 85 130 135 190 92S310 62 390 108" fill="none" stroke="#b69a69" stroke-width="0.8" opacity="0.25" />
+                        {embers.map((e) => <circle cx={e.x + 60} cy={e.y} r={e.r} fill="#e0a45e" opacity={e.o} />)}
+                      </g>
+                    )}
+                    {project.slug === "riverpulse" && (
+                      <g fill="none">
+                        {riverLines.map((d, k) => (
+                          <path d={d} stroke={k === 4 ? "#5ed8ff" : "#2a4256"} stroke-width={k === 4 ? 3 : 0.8} opacity={k === 4 ? 0.9 : 0.8} />
+                        ))}
+                      </g>
+                    )}
+                  </svg>
+                )}
+              </div>
+
+              <div class="tile-body">
+                <span class="tile-num">{project.number}</span>
+                <div class="tile-main">
+                  <div class="tile-row">
+                    <h3 class="tile-name">
+                      {href ? (
+                        <a href={href} target={isExternal(href) ? "_blank" : undefined} rel={isExternal(href) ? "noopener" : undefined}>
+                          {project.name}
+                          {isExternal(href) && <span class="visually-hidden"> (opens in a new tab)</span>}
+                        </a>
+                      ) : (
+                        project.name
+                      )}
+                    </h3>
+                    <p class={`status status--${statusTone[project.status]}`}>{statusLabels[project.status]}</p>
+                  </div>
+                  <div class="tile-row">
+                    <ul role="list" class="tile-tags" aria-label="Categories">
+                      {project.categories.slice(0, 2).map((category) => <li class="tag">{category}</li>)}
+                    </ul>
+                    {href && <span class="tile-arrow" aria-hidden="true">→</span>}
+                  </div>
+                </div>
+              </div>
+            </article>
+          </li>
+        );
+      })}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .atlas-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-lg);
+  }
+
+  .atlas-sub {
+    margin-top: var(--space-sm);
+    font-size: clamp(1.5rem, 2.6vw, 2.25rem);
+    font-weight: 400;
+    letter-spacing: -0.015em;
+    line-height: 1.2;
+    color: var(--text-secondary);
+  }
+
+  .filters {
+    display: flex;
+    gap: var(--space-xs);
+    margin-block: var(--space-2xl) var(--space-lg);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .filters::-webkit-scrollbar {
+    display: none;
+  }
+
+  .filter {
+    flex: none;
+    padding: 0.55rem 1.25rem;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-pill);
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    white-space: nowrap;
+  }
+
+  .filter.is-active {
+    border-color: var(--signal);
+    background: rgba(94, 216, 255, 0.08);
+    color: var(--signal);
+  }
+
+  .tiles {
+    display: grid;
+    gap: var(--space-md);
+  }
+
+  .tile-card {
+    position: relative;
+    height: 100%;
+    overflow: hidden;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    background: var(--aether-surface);
+    transition: border-color var(--motion-ui) var(--ease-out);
+  }
+
+  .tile-card.has-link:hover {
+    border-color: var(--border-strong);
+  }
+
+  .tile-media {
+    aspect-ratio: 20 / 7;
+    border-bottom: 1px solid var(--border-subtle);
+    background: radial-gradient(120% 140% at 50% 0%, #0f1a28 0%, #080d15 70%);
+  }
+
+  .tile-media img,
+  .tile-media svg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .tile-media img {
+    opacity: 0.9;
+  }
+
+  .tile-body {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--space-lg);
+    padding: var(--space-lg);
+  }
+
+  .tile-num {
+    padding-right: var(--space-lg);
+    border-right: 1px solid var(--border-default);
+    color: var(--text-secondary);
+    font-size: 1.75rem;
+    font-weight: 300;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tile-main {
+    display: grid;
+    gap: var(--space-md);
+    min-width: 0;
+  }
+
+  .tile-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+  }
+
+  .tile-name {
+    font-size: var(--text-lg);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+
+  /* Whole tile is the click target; the link itself stays the name. */
+  .tile-name a::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-md);
+  }
+
+  .tile-name a:focus-visible {
+    outline: none;
+  }
+
+  .tile-name a:focus-visible::after {
+    outline: 2px solid var(--signal);
+    outline-offset: -2px;
+  }
+
+  .tile-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .tile-tags .tag {
+    font-size: 0.8125rem;
+  }
+
+  .tile-arrow {
+    color: var(--text-secondary);
+    transition:
+      transform var(--motion-ui) var(--ease-out),
+      color var(--motion-ui) var(--ease-out);
+  }
+
+  .tile-card:hover .tile-arrow {
+    color: var(--signal);
+    transform: translateX(3px);
+  }
+
+  @media (min-width: 720px) {
+    .tiles {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .tiles {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+</style>

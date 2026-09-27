@@ -1,0 +1,218 @@
+---
+// Capability copy lives here so wording can change without touching markup.
+const capabilities = [
+  {
+    title: "Data Engineering",
+    body: "Reliable pipelines that collect, validate and process real-world data from multiple sources.",
+    examples: [
+      "API integrations and ETL pipelines",
+      "Data validation and quality checks",
+      "Orchestrated, documented workflows",
+    ],
+    icon: "database",
+    tone: "signal",
+  },
+  {
+    title: "Analytical Products",
+    body: "Turning complex datasets into clear analysis, models and interactive products that answer real questions.",
+    examples: [
+      "Domain-specific models and metrics",
+      "Static-first analytical apps",
+      "Interactive exploration tools",
+    ],
+    icon: "chart",
+    tone: "artifact",
+  },
+  {
+    title: "Geospatial Systems",
+    body: "Working with spatial data to understand patterns, relationships and real-world impact across places.",
+    examples: [
+      "Mapping and spatial analysis",
+      "Population and hazard data integration",
+      "Interactive map interfaces",
+    ],
+    icon: "map",
+    tone: "signal",
+  },
+  {
+    title: "End-to-End Products",
+    body: "Taking ideas from research to production, combining data, analysis and interface into one usable product.",
+    examples: [
+      "Full-stack data products",
+      "Published datasets and interfaces",
+      "Deployment and ongoing iteration",
+    ],
+    icon: "cube",
+    tone: "artifact",
+  },
+];
+
+const icons: Record<string, string> = {
+  database:
+    '<ellipse cx="16" cy="8" rx="10" ry="3.5"/><path d="M6 8v16c0 1.9 4.5 3.5 10 3.5s10-1.6 10-3.5V8M6 13.3c0 1.9 4.5 3.5 10 3.5s10-1.6 10-3.5M6 18.6c0 1.9 4.5 3.5 10 3.5s10-1.6 10-3.5"/>',
+  chart: '<path d="M5 27h22"/><rect x="7" y="18" width="4" height="9" rx="0.8"/><rect x="14" y="12" width="4" height="15" rx="0.8"/><rect x="21" y="5" width="4" height="22" rx="0.8"/>',
+  map: '<path d="M4 8.5 11.5 5l9 3.5L28 5v18.5L20.5 27l-9-3.5L4 27zM11.5 5v18.5M20.5 8.5V27"/>',
+  cube: '<path d="m16 4 11 6v12l-11 6-11-6V10zM5 10l11 6 11-6M16 16v12"/>',
+};
+---
+
+<section id="capabilities" class="section section--calm capabilities" aria-labelledby="capabilities-title">
+  <div class="container">
+    <div class="section-head">
+      <p class="eyebrow" data-reveal-step="0"><span class="num">04</span> / What I build</p>
+      <p class="annotation" data-reveal-step="0" aria-hidden="true">the work, not the logos ↘</p>
+      <h2 id="capabilities-title" class="section-title" data-reveal-step="1">
+        I build data products that turn complex systems <span class="accent">into insight.</span>
+      </h2>
+      <p class="lede" data-reveal-step="1">
+        End-to-end engineering, from raw data to interactive products, with a focus on clear,
+        usable answers.
+      </p>
+    </div>
+
+    <!-- PORT-003: cards reveal in reading order via data-reveal-step. -->
+    <ol class="cap-grid" role="list">
+      {capabilities.map((cap, i) => (
+        <li class="cap" data-reveal-step={i + 2}>
+          <article>
+            <header class="cap-head">
+              <svg class={`cap-icon cap-icon--${cap.tone}`} viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true" set:html={icons[cap.icon]} />
+              <span class="cap-line" aria-hidden="true"></span>
+              <span class="cap-num mono">0{i + 1}</span>
+            </header>
+            <h3 class="cap-title">{cap.title}</h3>
+            <p class="cap-body">{cap.body}</p>
+            <p class="cap-label mono">Examples</p>
+            <ul role="list" class="cap-examples">
+              {cap.examples.map((example) => <li>{example}</li>)}
+            </ul>
+          </article>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>
+
+<style>
+  .section-head {
+    position: relative;
+  }
+
+  /* The one handwritten-style note on the site (spec §5.3). */
+  .annotation {
+    position: absolute;
+    top: -0.35rem;
+    right: 0;
+    font-family: var(--font-editorial);
+    font-style: italic;
+    font-size: clamp(1.125rem, 1.6vw, 1.375rem);
+    color: var(--artifact);
+    transform: rotate(-3deg);
+    display: none;
+  }
+
+  .cap-grid {
+    display: grid;
+    gap: var(--space-md);
+  }
+
+  .cap article {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: clamp(1.5rem, 2.2vw, 2rem);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    background: rgba(13, 20, 32, 0.45);
+    transition: border-color var(--motion-ui) var(--ease-out);
+  }
+
+  .cap article:hover {
+    border-color: var(--border-strong);
+  }
+
+  .cap-head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+  }
+
+  .cap-icon {
+    flex: none;
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .cap-icon--signal {
+    color: var(--signal);
+  }
+
+  .cap-icon--artifact {
+    color: var(--artifact);
+  }
+
+  .cap-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border-default);
+  }
+
+  .cap-num {
+    color: var(--artifact);
+    letter-spacing: 0.08em;
+  }
+
+  .cap-title {
+    margin-top: var(--space-xl);
+    font-size: var(--text-xl);
+  }
+
+  .cap-body {
+    flex-grow: 1; /* keeps dividers + examples aligned across cards */
+    margin-top: var(--space-sm);
+    color: var(--text-secondary);
+    font-size: 0.9375rem;
+    padding-bottom: var(--space-lg);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .cap-label {
+    margin-top: var(--space-lg);
+    color: var(--text-muted);
+    letter-spacing: 0.2em;
+  }
+
+  .cap-examples {
+    display: grid;
+    gap: 0.55rem;
+    margin-top: var(--space-md);
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+  }
+
+  .cap-examples li {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .cap-examples li::before {
+    content: "→";
+    color: var(--signal);
+  }
+
+  @media (min-width: 720px) {
+    .cap-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .annotation {
+      display: block;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .cap-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+</style>
