@@ -51,7 +51,8 @@ const hub = { x: 1010, y: 370 };
 const nodes = [
   { id: "de", x: 760, y: 190, label: "Data", label2: "Engineering", left: true },
   { id: "geo", x: 1250, y: 170, label: "Geospatial", label2: "Systems", left: false },
-  { id: "ap", x: 780, y: 500, label: "Analytical", label2: "Products", left: true },
+  // Sits below-right of the copy block, in the open space beside the buttons.
+  { id: "ap", x: 870, y: 615, label: "Analytical", label2: "Products", left: true },
   { id: "ii", x: 1300, y: 560, label: "Interactive", label2: "Interfaces", left: false },
 ] as const;
 
@@ -63,7 +64,7 @@ const waypoints = [
   { x: 1215, y: 640 },
   { x: 1040, y: 610 },
   { x: 1370, y: 410, artifact: true },
-  { x: 880, y: 650, artifact: true },
+  { x: 975, y: 705, artifact: true },
   { x: 1390, y: 720, artifact: true },
 ];
 
@@ -72,8 +73,8 @@ const edges: [number, number, number, number][] = [
   [hub.x, hub.y, 760, 190],
   [hub.x, hub.y, 1160, 265],
   [1160, 265, 1250, 170],
-  [hub.x, hub.y, 880, 650],
-  [890, 270, 780, 500],
+  [hub.x, hub.y, 975, 705],
+  [890, 270, 870, 615],
   [1190, 120, 1300, 560],
   [1120, 480, 1215, 640],
 ];
@@ -179,10 +180,10 @@ const edges: [number, number, number, number][] = [
       <!-- Capability nodes -->
       <g>
         {nodes.map((n, i) => (
-          <g class="atlas-node">
+          <g class:list={["atlas-node", { "atlas-near-copy": n.left }]}>
             <circle class="atlas-halo" style={`--d: ${i * 2.3}s`} cx={n.x} cy={n.y} r="11" fill="#5ed8ff" opacity="0.12" />
             <circle cx={n.x} cy={n.y} r="3.4" fill="#5ed8ff" />
-            <text x={n.x + 26} y={n.y - 4} class:list={["atlas-label", { "atlas-near-copy": n.left }]}>
+            <text x={n.x + 26} y={n.y - 4} class="atlas-label">
               <tspan>{n.label}</tspan>
               <tspan x={n.x + 26} dy="18">{n.label2}</tspan>
             </text>
@@ -548,8 +549,14 @@ const edges: [number, number, number, number][] = [
     }
   }
 
-  /* Until the canvas is wide enough, labels near the copy would collide with it. */
-  @media (max-width: 1279px) {
+  /*
+   * The chart is scaled to cover the hero, so on narrower windows it grows and
+   * slides left under the copy. Below this width the two nodes nearest the copy
+   * (Data Engineering, Analytical Products) and the triangle marker are hidden.
+   *
+   * TUNE HERE: nodes appear from 1500px wide. Change 1499px to move the cut-off.
+   */
+  @media (max-width: 1499px) {
     .atlas-near-copy {
       display: none;
     }
