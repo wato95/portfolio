@@ -31,7 +31,7 @@ const year = new Date().getFullYear();
 
   <div class="container">
     <div class="contact-grid">
-      <div class="contact-statement">
+      <div class="contact-statement" data-reveal>
         <p class="eyebrow"><span class="num">07</span> / Contact</p>
         <p class="contact-kicker">Get in touch <span aria-hidden="true">/</span></p>
         <h2 id="contact-title" class="contact-title">
@@ -39,7 +39,7 @@ const year = new Date().getFullYear();
         </h2>
       </div>
 
-      <nav class="contact-links" aria-labelledby="contact-links-title">
+      <nav class="contact-links" aria-labelledby="contact-links-title" data-reveal style="--step: 2">
         <p id="contact-links-title" class="contact-links-title mono">Find me online</p>
         <ul role="list">
           {links.map((link) => (

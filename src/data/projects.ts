@@ -160,8 +160,25 @@ export const projects: Project[] = [
 
 export const featuredProjects = projects.filter((project) => project.featured);
 
-/** Filters derived from the data: `All` plus every category actually in use. */
+/**
+ * Atlas filters, derived from the data (`All` is added by the UI):
+ * 1. categories in `categoryOrder` that at least one project carries, in that order;
+ * 2. then any other category shared by 2+ projects, alphabetically — so new
+ *    categories appear without a code change, while one-off descriptive tags
+ *    (e.g. "Energy") stay tile labels rather than single-result filters.
+ */
 export function atlasFilters(list: Project[] = projects) {
-  const present = new Set(list.flatMap((project) => project.categories));
-  return categoryOrder.filter(({ category }) => present.has(category));
+  const counts = new Map<string, number>();
+  for (const category of list.flatMap((project) => project.categories)) {
+    counts.set(category, (counts.get(category) ?? 0) + 1);
+  }
+
+  const preferred = categoryOrder.filter(({ category }) => counts.has(category));
+  const known = new Set(categoryOrder.map(({ category }) => category));
+  const discovered = [...counts]
+    .filter(([category, count]) => !known.has(category) && count >= 2)
+    .map(([category]) => ({ category, label: category }))
+    .sort((a, b) => a.label.localeCompare(b.label));
+
+  return [...preferred, ...discovered];
 }

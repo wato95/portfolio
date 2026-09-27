@@ -20,13 +20,13 @@ const icons: Record<string, string> = {
 const formatUtc = (iso: string) =>
   new Date(iso).toISOString().replace("T", " ").slice(0, 16) + " UTC";
 
-const maxReason = (reasons: { count: number }[]) =>
-  Math.max(1, ...reasons.map((reason) => reason.count));
+const barWidth = (value: number, items: { value: number }[]) =>
+  `${(value / Math.max(1, ...items.map((item) => item.value))) * 100}%`;
 ---
 
 <section id="pipeline" class="section section--calm pipeline" aria-labelledby="pipeline-title">
   <div class="container">
-    <div class="section-head">
+    <div class="section-head" data-reveal>
       <p class="eyebrow"><span class="num">03</span> / Under the interface</p>
       <h2 id="pipeline-title" class="section-title">
         From raw data to <span class="accent">real products</span>
@@ -38,83 +38,99 @@ const maxReason = (reasons: { count: number }[]) =>
     </div>
 
     <!--
-      PORT-003: stages become keyboard-operable controls with auto-advance
-      playback. Static state shows one active stage and its detail.
+      Interaction lives in src/scripts/pipeline.ts. Without JavaScript this is a
+      stable static state: one active stage with its detail visible.
     -->
-    <div class="stages-scroll">
-      <ol class="stages" role="list" data-pipeline-stages>
-        {stages.map((stage, i) => (
-          <li
-            class:list={[
-              "stage",
-              { "is-active": i === activeIndex, "is-done": i < activeIndex },
-            ]}
-            data-stage={stage.id}
-            aria-current={i === activeIndex ? "step" : undefined}
-          >
-            <span class="stage-node">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={icons[stage.id]} />
-            </span>
-            <span class="stage-num mono">{stage.number}</span>
-            <span class="stage-name mono">{stage.name}</span>
-            <span class="stage-summary">{stage.summary}</span>
-          </li>
-        ))}
-      </ol>
-    </div>
+    <div class="pipeline-ui" data-pipeline data-default-stage={pipeline.defaultStage}>
+      <div class="stages-scroll" data-pipeline-scroller data-reveal style="--step: 1">
+        <ol class="stages" role="list" aria-label={`${pipeline.system} pipeline stages`}>
+          {stages.map((stage, i) => (
+            <li
+              class:list={["stage", { "is-active": i === activeIndex, "is-done": i < activeIndex }]}
+              data-stage={stage.id}
+            >
+              <button
+                type="button"
+                class="stage-btn"
+                aria-controls="pipeline-detail"
+                aria-label={`${stage.number} ${stage.name}: ${stage.summary}`}
+                aria-current={i === activeIndex ? "step" : undefined}
+                data-stage-button={stage.id}
+              >
+                <span class="stage-node">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={icons[stage.id]} />
+                </span>
+                <span class="stage-num mono">{stage.number}</span>
+                <span class="stage-name mono">{stage.name}</span>
+                <span class="stage-summary">{stage.summary}</span>
+              </button>
+            </li>
+          ))}
+        </ol>
+      </div>
 
-    <div class="detail panel" data-pipeline-detail>
-      {stages.map((stage, i) => (
-        <div class="detail-body" data-stage-detail={stage.id} hidden={i !== activeIndex}>
-          <div class="detail-intro">
-            <p class="detail-label mono">Current stage</p>
-            <p class="detail-id">
-              <span class="detail-num">{stage.number}</span>
-              <span class="detail-slash" aria-hidden="true">/</span>
-              {stage.name}
-            </p>
-            <h3 class="detail-title">{stage.title}</h3>
-            <p class="detail-text">{stage.explanation}</p>
-          </div>
+      <div id="pipeline-detail" class="detail panel" data-reveal style="--step: 2">
+        <span class="playback-bar" aria-hidden="true" data-playback-bar><span></span></span>
 
-          <dl class="detail-metrics">
-            {stage.metrics.map((metric) => (
-              <div class="metric">
-                <dt>{metric.label}</dt>
-                <dd>{metric.value}</dd>
-                {metric.note && <p class="metric-note">{metric.note}</p>}
+        <!-- All stages share one grid cell, so switching never shifts the layout. -->
+        <div class="detail-stack">
+          {stages.map((stage, i) => (
+            <div class="detail-body" data-stage-detail={stage.id} hidden={i !== activeIndex}>
+              <div class="detail-intro">
+                <p class="detail-label mono">Current stage</p>
+                <p class="detail-id">
+                  <span class="detail-num">{stage.number}</span>
+                  <span class="detail-slash" aria-hidden="true">/</span>
+                  {stage.name}
+                </p>
+                <h3 class="detail-title">{stage.title}</h3>
+                <p class="detail-text">{stage.explanation}</p>
               </div>
-            ))}
-          </dl>
 
-          {stage.reasons && (
-            <div class="detail-reasons">
-              <p class="detail-label mono">Top rejection reasons</p>
-              <ul role="list">
-                {stage.reasons.map((reason) => (
-                  <li>
-                    <span class="reason-label">{reason.label}</span>
-                    <span class="reason-bar" aria-hidden="true">
-                      <span style={`--w: ${(reason.count / maxReason(stage.reasons!)) * 100}%`}></span>
-                    </span>
-                    <span class="reason-count">{reason.count}</span>
-                  </li>
+              <dl class="detail-metrics">
+                {stage.metrics.map((metric) => (
+                  <div class="metric">
+                    <dt>{metric.label}</dt>
+                    <dd>{metric.value}</dd>
+                    {metric.note && <p class="metric-note">{metric.note}</p>}
+                  </div>
                 ))}
-              </ul>
-            </div>
-          )}
-        </div>
-      ))}
+              </dl>
 
-      <div class="detail-foot">
-        {pipeline.isFixture && (
-          <p class="fixture-badge mono">Development fixture · illustrative values, not live telemetry</p>
-        )}
-        <p class="detail-through mono">
-          Data through <time datetime={pipeline.dataThrough}>{formatUtc(pipeline.dataThrough)}</time>
-        </p>
-        <!-- PORT-003: playback instructions + stage position appear with playback. -->
-        <p class="detail-playback mono" data-pipeline-playback hidden></p>
+              {stage.breakdown && (
+                <div class="detail-breakdown">
+                  <p class="detail-label mono">{stage.breakdown.title}</p>
+                  <ul role="list">
+                    {stage.breakdown.items.map((item) => (
+                      <li>
+                        <span class="bd-label">{item.label}</span>
+                        <span class="bd-bar" aria-hidden="true">
+                          <span style={`--w: ${barWidth(item.value, stage.breakdown!.items)}`}></span>
+                        </span>
+                        <span class="bd-value">{item.display ?? item.value}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <div class="detail-foot">
+          <div class="playback" data-playback hidden>
+            <p class="playback-status mono" data-playback-status></p>
+            <button type="button" class="playback-toggle mono" data-playback-toggle hidden></button>
+          </div>
+          <div class="detail-meta">
+            {pipeline.isFixture && (
+              <p class="fixture-badge mono">Development fixture · illustrative values, not live telemetry</p>
+            )}
+            <p class="detail-through mono">
+              Data through <time datetime={pipeline.dataThrough}>{formatUtc(pipeline.dataThrough)}</time>
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -127,6 +143,7 @@ const maxReason = (reasons: { count: number }[]) =>
     padding-inline: var(--gutter);
     overflow-x: auto;
     scroll-snap-type: x proximity;
+    scroll-padding-inline: var(--gutter);
     scrollbar-width: none;
   }
 
@@ -144,12 +161,23 @@ const maxReason = (reasons: { count: number }[]) =>
 
   .stage {
     position: relative;
+    padding-right: var(--space-md);
+    scroll-snap-align: start;
+  }
+
+  .stage-btn {
     display: grid;
     align-content: start;
     justify-items: start;
     gap: 0.35rem;
-    padding-right: var(--space-md);
-    scroll-snap-align: start;
+    width: 100%;
+    padding: 0;
+    text-align: left;
+    border-radius: var(--radius-md);
+  }
+
+  .stage-btn:focus-visible {
+    outline-offset: 6px;
   }
 
   /* Connector to the next stage: dashed and quiet by default. */
@@ -162,6 +190,20 @@ const maxReason = (reasons: { count: number }[]) =>
     border-top: 1px dashed var(--border-strong);
   }
 
+  /* Signal fill that travels along the connector once a stage is complete. */
+  .stage:not(:last-child) .stage-btn::after {
+    content: "";
+    position: absolute;
+    top: calc(var(--node) / 2);
+    left: calc(var(--node) + 0.75rem);
+    right: 0.75rem;
+    height: 1px;
+    background: rgba(94, 216, 255, 0.6);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--motion-slow) var(--ease-out);
+  }
+
   /* Waypoint dot midway along each connector. */
   .stage:not(:last-child)::before {
     content: "";
@@ -172,6 +214,8 @@ const maxReason = (reasons: { count: number }[]) =>
     height: 6px;
     border-radius: 50%;
     background: var(--text-muted);
+    z-index: 1;
+    transition: background-color var(--motion-medium) var(--ease-out);
   }
 
   .stage-node {
@@ -184,6 +228,16 @@ const maxReason = (reasons: { count: number }[]) =>
     border-radius: var(--radius-md);
     background: var(--aether-surface);
     color: var(--text-secondary);
+    transition:
+      border-color var(--motion-medium) var(--ease-out),
+      color var(--motion-medium) var(--ease-out),
+      background-color var(--motion-medium) var(--ease-out),
+      box-shadow var(--motion-medium) var(--ease-out);
+  }
+
+  .stage-btn:hover .stage-node {
+    border-color: var(--border-strong);
+    color: var(--text-primary);
   }
 
   .stage-node svg {
@@ -206,11 +260,12 @@ const maxReason = (reasons: { count: number }[]) =>
     color: var(--text-muted);
     font-size: var(--text-sm);
     line-height: 1.45;
+    transition: color var(--motion-medium) var(--ease-out);
   }
 
   /* Prior route is illuminated. */
-  .stage.is-done::after {
-    border-top: 1px solid rgba(94, 216, 255, 0.55);
+  .stage.is-done .stage-btn::after {
+    transform: scaleX(1);
   }
 
   .stage.is-done::before {
@@ -223,7 +278,8 @@ const maxReason = (reasons: { count: number }[]) =>
   }
 
   /* Active stage adopts Signal. */
-  .stage.is-active .stage-node {
+  .stage.is-active .stage-node,
+  .stage.is-active .stage-btn:hover .stage-node {
     border-color: var(--signal);
     color: var(--signal);
     background: rgba(94, 216, 255, 0.06);
@@ -242,17 +298,64 @@ const maxReason = (reasons: { count: number }[]) =>
 
   /* ---- Detail panel ---- */
   .detail {
+    position: relative;
+    overflow: hidden;
     margin-top: var(--space-2xl);
     padding: clamp(1.25rem, 3vw, 2.5rem);
   }
 
+  /* Progress of the current auto-advance interval, along the panel's top edge. */
+  .playback-bar {
+    position: absolute;
+    top: 0;
+    left: var(--radius-lg);
+    right: var(--radius-lg);
+    height: 1px;
+  }
+
+  .playback-bar span {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, var(--signal));
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+
+  .playback-bar.is-running span {
+    animation: playback-fill var(--playback-ms, 6000ms) linear forwards;
+  }
+
+  @keyframes playback-fill {
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  .detail-stack {
+    display: grid;
+  }
+
   .detail-body {
+    grid-area: 1 / 1;
     display: grid;
     gap: var(--space-xl);
   }
 
+  /* Hidden stages still size the stack, so the panel height never jumps. */
   .detail-body[hidden] {
-    display: none;
+    display: grid;
+    visibility: hidden;
+  }
+
+  .detail-body.is-entering {
+    animation: detail-in var(--motion-medium) var(--ease-out);
+  }
+
+  @keyframes detail-in {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
   }
 
   .detail-label {
@@ -293,7 +396,7 @@ const maxReason = (reasons: { count: number }[]) =>
 
   .detail-metrics {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+    grid-template-columns: 1fr;
     gap: var(--space-sm);
     align-content: start;
   }
@@ -328,29 +431,29 @@ const maxReason = (reasons: { count: number }[]) =>
     font-size: var(--text-xs);
   }
 
-  .detail-reasons ul {
+  .detail-breakdown ul {
     display: grid;
     gap: 0.7rem;
     margin-top: var(--space-md);
   }
 
-  .detail-reasons li {
+  .detail-breakdown li {
     display: grid;
-    grid-template-columns: 8.5rem minmax(3rem, 1fr) 1.5rem;
+    grid-template-columns: 8.5rem minmax(3rem, 1fr) 4rem; /* fixed tracks keep bars aligned across rows */
     align-items: center;
     gap: var(--space-md);
     font-size: var(--text-sm);
     color: var(--text-secondary);
   }
 
-  .reason-bar {
+  .bd-bar {
     height: 4px;
     border-radius: var(--radius-pill);
     background: var(--border-subtle);
     overflow: hidden;
   }
 
-  .reason-bar span {
+  .bd-bar span {
     display: block;
     width: var(--w);
     height: 100%;
@@ -358,7 +461,7 @@ const maxReason = (reasons: { count: number }[]) =>
     background: var(--artifact);
   }
 
-  .reason-count {
+  .bd-value {
     text-align: right;
     font-variant-numeric: tabular-nums;
     color: var(--text-primary);
@@ -369,10 +472,68 @@ const maxReason = (reasons: { count: number }[]) =>
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: var(--space-sm) var(--space-xl);
+    gap: var(--space-md) var(--space-xl);
     margin-top: var(--space-xl);
     padding-top: var(--space-lg);
     border-top: 1px solid var(--border-subtle);
+  }
+
+  .detail-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-xs) var(--space-xl);
+  }
+
+  .playback {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-sm) var(--space-md);
+  }
+
+  .playback[hidden] {
+    display: none;
+  }
+
+  .playback-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    font-size: 0.6875rem;
+    letter-spacing: 0.12em;
+  }
+
+  .playback-status::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--text-muted);
+  }
+
+  .playback[data-state="playing"] .playback-status::before {
+    background: var(--signal);
+    box-shadow: 0 0 0 3px var(--signal-soft);
+  }
+
+  .playback-toggle {
+    min-height: 2.25rem;
+    padding: 0.4rem 0.9rem;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-pill);
+    color: var(--text-primary);
+    font-size: 0.6875rem;
+    letter-spacing: 0.14em;
+    transition:
+      border-color var(--motion-ui) var(--ease-out),
+      color var(--motion-ui) var(--ease-out);
+  }
+
+  .playback-toggle:hover {
+    border-color: var(--signal);
+    color: var(--signal);
   }
 
   .fixture-badge {
@@ -397,17 +558,31 @@ const maxReason = (reasons: { count: number }[]) =>
     letter-spacing: 0.1em;
   }
 
+  /* Mobile: metrics read as compact label/value rows. */
+  @media (max-width: 719px) {
+    .metric {
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+      column-gap: var(--space-md);
+      padding: 0.8rem 1rem;
+    }
+
+    .metric dd {
+      order: 2;
+      font-size: var(--text-xl);
+    }
+
+    .metric-note {
+      order: 3;
+      width: 100%;
+    }
+  }
+
   @media (min-width: 720px) {
     .detail-metrics {
       grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-
-    .detail-body {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
-    }
-
-    .detail-reasons {
-      grid-column: 1 / -1;
     }
   }
 
@@ -415,6 +590,10 @@ const maxReason = (reasons: { count: number }[]) =>
     .detail-body {
       grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
       gap: var(--space-2xl);
+    }
+
+    .detail-breakdown {
+      grid-column: 1 / -1;
     }
 
     .stages-scroll {
@@ -434,7 +613,7 @@ const maxReason = (reasons: { count: number }[]) =>
       grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr) minmax(0, 0.95fr);
     }
 
-    .detail-reasons {
+    .detail-breakdown {
       grid-column: auto;
       padding-left: var(--space-2xl);
       border-left: 1px solid var(--border-subtle);
@@ -451,3 +630,7 @@ const maxReason = (reasons: { count: number }[]) =>
     }
   }
 </style>
+
+<script>
+  import "../scripts/pipeline";
+</script>

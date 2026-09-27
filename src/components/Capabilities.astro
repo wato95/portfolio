@@ -47,6 +47,9 @@ const capabilities = [
   },
 ];
 
+// pathLength="1" lets CSS draw any icon's strokes with one dash rule.
+const drawable = (svg: string) => svg.replace(/<(path|rect|ellipse|circle)/g, '<$1 pathLength="1"');
+
 const icons: Record<string, string> = {
   database:
     '<ellipse cx="16" cy="8" rx="10" ry="3.5"/><path d="M6 8v16c0 1.9 4.5 3.5 10 3.5s10-1.6 10-3.5V8M6 13.3c0 1.9 4.5 3.5 10 3.5s10-1.6 10-3.5M6 18.6c0 1.9 4.5 3.5 10 3.5s10-1.6 10-3.5"/>',
@@ -57,26 +60,26 @@ const icons: Record<string, string> = {
 ---
 
 <section id="capabilities" class="section section--calm capabilities" aria-labelledby="capabilities-title">
-  <div class="container">
+  <!-- Sequence: annotation → heading → 01 → 02 → 03 → 04 (see --step). -->
+  <div class="container" data-reveal-group>
     <div class="section-head">
-      <p class="eyebrow" data-reveal-step="0"><span class="num">04</span> / What I build</p>
-      <p class="annotation" data-reveal-step="0" aria-hidden="true">the work, not the logos ↘</p>
-      <h2 id="capabilities-title" class="section-title" data-reveal-step="1">
+      <p class="annotation" data-reveal-step style="--step: 0" aria-hidden="true">the work, not the logos ↘</p>
+      <p class="eyebrow" data-reveal-step style="--step: 0"><span class="num">04</span> / What I build</p>
+      <h2 id="capabilities-title" class="section-title" data-reveal-step style="--step: 1">
         I build data products that turn complex systems <span class="accent">into insight.</span>
       </h2>
-      <p class="lede" data-reveal-step="1">
+      <p class="lede" data-reveal-step style="--step: 1">
         End-to-end engineering, from raw data to interactive products, with a focus on clear,
         usable answers.
       </p>
     </div>
 
-    <!-- PORT-003: cards reveal in reading order via data-reveal-step. -->
     <ol class="cap-grid" role="list">
       {capabilities.map((cap, i) => (
-        <li class="cap" data-reveal-step={i + 2}>
+        <li class="cap" data-reveal-step style={`--step: ${i + 2}`}>
           <article>
             <header class="cap-head">
-              <svg class={`cap-icon cap-icon--${cap.tone}`} viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true" set:html={icons[cap.icon]} />
+              <svg class={`cap-icon cap-icon--${cap.tone}`} viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true" set:html={drawable(icons[cap.icon])} />
               <span class="cap-line" aria-hidden="true"></span>
               <span class="cap-num mono">0{i + 1}</span>
             </header>
@@ -155,6 +158,29 @@ const icons: Record<string, string> = {
     flex: 1;
     height: 1px;
     background: var(--border-default);
+    transform-origin: left;
+  }
+
+  /* Once a card is in: its icon strokes draw, then the rule extends. */
+  :global(.js-reveal) .cap-icon :global(*) {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    transition: stroke-dashoffset 1s var(--ease-out);
+    transition-delay: calc(var(--step) * 110ms + 250ms);
+  }
+
+  :global(.js-reveal) .cap-line {
+    transform: scaleX(0);
+    transition: transform var(--motion-slow) var(--ease-out);
+    transition-delay: calc(var(--step) * 110ms + 350ms);
+  }
+
+  .is-visible .cap-icon :global(*) {
+    stroke-dashoffset: 0;
+  }
+
+  .is-visible .cap-line {
+    transform: none;
   }
 
   .cap-num {
@@ -168,7 +194,7 @@ const icons: Record<string, string> = {
   }
 
   .cap-body {
-    flex-grow: 1; /* keeps dividers + examples aligned across cards */
+    flex-grow: 1; /* fallback alignment where subgrid is unsupported */
     margin-top: var(--space-sm);
     color: var(--text-secondary);
     font-size: 0.9375rem;
@@ -184,6 +210,7 @@ const icons: Record<string, string> = {
 
   .cap-examples {
     display: grid;
+    align-content: start;
     gap: 0.55rem;
     margin-top: var(--space-md);
     font-size: var(--text-sm);
@@ -198,6 +225,21 @@ const icons: Record<string, string> = {
   .cap-examples li::before {
     content: "→";
     color: var(--signal);
+  }
+
+  /* Cards share row tracks, so titles, dividers and examples line up across a row. */
+  @supports (grid-template-rows: subgrid) {
+    .cap,
+    .cap article {
+      display: grid;
+      grid-row: span 5;
+      grid-template-rows: subgrid;
+      row-gap: 0;
+    }
+
+    .cap article {
+      grid-row: 1 / -1;
+    }
   }
 
   @media (min-width: 720px) {
