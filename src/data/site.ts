@@ -13,18 +13,17 @@ const hasCv = existsSync(join(process.cwd(), "public", CV_PATH));
  * Personal identity and contact links.
  *
  * Any value left `undefined` hides its link or CTA — never publish a dead
- * control. Entries marked TODO must be confirmed before PORT-004 closes.
+ * control. URLs must be absolute (https://…), or they resolve relative to
+ * the site and break.
  */
 export const site = {
-  // TODO(PORT-004): confirm the exact displayed name.
   name: "Charlie Watson",
   title: "Charlie Watson — Data engineering, analytical products, interfaces",
   description:
     "Portfolio of Charlie Watson: data engineering, analytical products and interactive interfaces built around real-world data.",
 
   githubUrl: "https://github.com/wato95",
-  // TODO(PORT-004): supply real values. Undefined = link hidden.
-  linkedinUrl: "www.linkedin.com/in/charlie-watson-90142b152" as string | undefined,
+  linkedinUrl: "https://www.linkedin.com/in/charlie-watson-90142b152" as string | undefined,
   email: "wato95@gmail.com" as string | undefined,
   cvUrl: hasCv ? withBase(CV_PATH) : undefined,
 

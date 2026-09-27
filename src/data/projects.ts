@@ -103,7 +103,7 @@ export const projects: Project[] = [
     slug: "gridpulse-bm",
     number: "02",
     name: "GridPulse BM",
-    // TODO(PORT-004): confirm final short description and public status.
+    // Description is not rendered on the homepage yet (only featured projects show one).
     description:
       "Energy data platform that ingests, validates, persists and serves grid data through a modular, observable pipeline.",
     status: "building",
@@ -114,8 +114,7 @@ export const projects: Project[] = [
   {
     slug: "mythology-network",
     number: "03",
-    // TODO(PORT-004): confirm final public name.
-    name: "Olympian network explorer",
+    name: "Olympian Network Explorer",
     description:
       "An interactive knowledge graph of Greek mythology where every relationship carries its source, so conflicting traditions stay visible rather than flattened.",
     status: "building",
@@ -138,7 +137,7 @@ export const projects: Project[] = [
     slug: "firewatch",
     number: "05",
     name: "FireWatch",
-    // TODO(PORT-004): confirm description once scoped.
+    // Not rendered yet; refine once the project is scoped.
     description: "A planned analytical product for exploring wildfire activity from public data.",
     status: "planned",
     categories: ["Data Product", "Environmental"],
@@ -149,7 +148,7 @@ export const projects: Project[] = [
     slug: "riverpulse",
     number: "06",
     name: "RiverPulse",
-    // TODO(PORT-004): confirm description once scoped.
+    // Not rendered yet; refine once the project is scoped.
     description: "A planned analytical product for exploring river levels and flow from public data.",
     status: "planned",
     categories: ["Data Product", "Geospatial"],
