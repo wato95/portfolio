@@ -5,11 +5,11 @@ import { withBase } from "../data/site";
 
 <section id="work" class="section section--calm work" aria-labelledby="work-title">
   <div class="container">
-    <h2 id="work-title" class="eyebrow"><span class="num">02</span> / Selected work</h2>
+    <h2 id="work-title" class="eyebrow" data-reveal><span class="num">02</span> / Selected work</h2>
 
     {featuredProjects.map((project) => (
       <article class="feature" aria-labelledby={`feature-${project.slug}`}>
-        <div class="feature-copy">
+        <div class="feature-copy" data-reveal style="--step: 1">
           <p class="feature-index">
             <span class="feature-ring" aria-hidden="true"></span>
             <span class="feature-num">{project.number}</span>
@@ -76,7 +76,7 @@ import { withBase } from "../data/site";
         </div>
 
         {project.heroImage && (
-          <figure class="feature-media">
+          <figure class="feature-media" data-reveal style="--step: 3">
             <div class="product-frame">
               <img
                 src={withBase(project.heroImage)}
@@ -237,6 +237,7 @@ import { withBase } from "../data/site";
 
   .product-frame:hover {
     border-color: var(--border-strong);
+    transform: translateY(-2px);
   }
 
   .product-frame img {

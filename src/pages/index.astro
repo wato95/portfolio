@@ -25,6 +25,16 @@ const ogImage: string | undefined = undefined;
     <link rel="canonical" href={canonical} />
     <link rel="icon" type="image/svg+xml" href={withBase("/favicon.svg")} />
     <meta name="theme-color" content="#05070c" />
+    <!--
+      Opt in to scroll reveals before first paint. If the reveal module has not
+      run within 3 s (blocked or failed script), fall back to showing everything.
+    -->
+    <script is:inline>
+      document.documentElement.classList.add("js-reveal");
+      setTimeout(function () {
+        if (!window.__aetherReveal) document.documentElement.classList.remove("js-reveal");
+      }, 3000);
+    </script>
 
     <meta property="og:type" content="website" />
     <meta property="og:title" content={site.title} />
@@ -45,5 +55,8 @@ const ogImage: string | undefined = undefined;
       <ProjectAtlas />
     </main>
     <Footer />
+    <script>
+      import "../scripts/reveal";
+    </script>
   </body>
 </html>

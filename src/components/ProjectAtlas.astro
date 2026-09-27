@@ -57,7 +57,7 @@ const riverLines = Array.from({ length: 9 }, (_, k) => {
 
 <section id="projects" class="section section--calm atlas-section" aria-labelledby="atlas-title">
   <div class="container">
-    <header class="atlas-head">
+    <header class="atlas-head" data-reveal>
       <div>
         <h2 id="atlas-title" class="eyebrow"><span class="num">06</span> / Project atlas</h2>
         <p class="atlas-sub">All projects with filtering and overview</p>
@@ -66,21 +66,24 @@ const riverLines = Array.from({ length: 9 }, (_, k) => {
     </header>
 
     <!--
-      Filters are derived from projects.ts categories. PORT-003 turns these
-      into toggle buttons that filter the grid via data-categories.
+      Filters are derived from projects.ts categories (atlasFilters). They start
+      hidden and are revealed by src/scripts/projectAtlas.ts, so without
+      JavaScript there are no inert controls — just the full grid.
     -->
-    <ul class="filters" role="list" aria-label="Project categories" data-atlas-filters>
-      <li class="filter is-active" data-filter="all">All</li>
-      {filters.map(({ category, label }) => (
-        <li class="filter" data-filter={category}>{label}</li>
-      ))}
-    </ul>
+    <div data-atlas>
+      <div class="filters" role="group" aria-label="Filter projects by category" data-atlas-filters hidden>
+        <button type="button" class="filter" data-filter="all" aria-pressed="true">All</button>
+        {filters.map(({ category, label }) => (
+          <button type="button" class="filter" data-filter={category} aria-pressed="false">{label}</button>
+        ))}
+      </div>
+      <p class="visually-hidden" aria-live="polite" data-atlas-status></p>
 
-    <ul class="tiles" role="list" data-atlas-grid>
-      {projects.map((project) => {
+    <ul class="tiles" role="list" data-reveal-group>
+      {projects.map((project, i) => {
         const href = tileHref(project);
         return (
-          <li class="tile" data-categories={project.categories.join("|")}>
+          <li class="tile" data-categories={project.categories.join("|")} data-reveal-step style={`--step: ${i}`}>
             <article class:list={["tile-card", { "has-link": href }]}>
               <div class="tile-media" aria-hidden="true">
                 {project.thumbnail ? (
@@ -164,6 +167,7 @@ const riverLines = Array.from({ length: 9 }, (_, k) => {
         );
       })}
     </ul>
+    </div>
   </div>
 </section>
 
@@ -188,8 +192,16 @@ const riverLines = Array.from({ length: 9 }, (_, k) => {
     display: flex;
     gap: var(--space-xs);
     margin-block: var(--space-2xl) var(--space-lg);
+    padding: 3px; /* room for focus rings inside the scroll container */
     overflow-x: auto;
     scrollbar-width: none;
+    /* Fade the trailing edge so the row reads as scrollable on narrow screens. */
+    -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent);
+    mask-image: linear-gradient(90deg, #000 85%, transparent);
+  }
+
+  .filters[hidden] {
+    display: none;
   }
 
   .filters::-webkit-scrollbar {
@@ -198,18 +210,50 @@ const riverLines = Array.from({ length: 9 }, (_, k) => {
 
   .filter {
     flex: none;
+    min-height: 2.75rem;
     padding: 0.55rem 1.25rem;
     border: 1px solid var(--border-default);
     border-radius: var(--radius-pill);
     color: var(--text-secondary);
     font-size: var(--text-sm);
     white-space: nowrap;
+    transition:
+      border-color var(--motion-ui) var(--ease-out),
+      color var(--motion-ui) var(--ease-out),
+      background-color var(--motion-ui) var(--ease-out);
   }
 
-  .filter.is-active {
+  .filter:hover {
+    border-color: var(--border-strong);
+    color: var(--text-primary);
+  }
+
+  /* Selected: Signal colour plus a check mark, so state isn't colour alone. */
+  .filter[aria-pressed="true"] {
     border-color: var(--signal);
     background: rgba(94, 216, 255, 0.08);
     color: var(--signal);
+  }
+
+  .filter[aria-pressed="true"]::before {
+    content: "✓";
+    margin-right: 0.45rem;
+    font-size: 0.8em;
+  }
+
+  .tile[hidden] {
+    display: none;
+  }
+
+  .tile.is-entering {
+    animation: tile-in var(--motion-ui) var(--ease-out);
+  }
+
+  @keyframes tile-in {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
   }
 
   .tiles {
@@ -231,6 +275,16 @@ const riverLines = Array.from({ length: 9 }, (_, k) => {
     border-color: var(--border-strong);
   }
 
+  .tile-card.has-link:hover .tile-media img,
+  .tile-card.has-link:hover .tile-media svg {
+    opacity: 1;
+  }
+
+  .tile-media img,
+  .tile-media svg {
+    transition: opacity var(--motion-ui) var(--ease-out);
+  }
+
   .tile-media {
     aspect-ratio: 20 / 7;
     border-bottom: 1px solid var(--border-subtle);
@@ -249,6 +303,7 @@ const riverLines = Array.from({ length: 9 }, (_, k) => {
   }
 
   .tile-body {
+    position: relative;
     display: grid;
     grid-template-columns: auto 1fr;
     gap: var(--space-lg);
@@ -303,6 +358,7 @@ const riverLines = Array.from({ length: 9 }, (_, k) => {
   }
 
   .tile-tags {
+    padding-right: 1.75rem; /* clear the arrow */
     display: flex;
     flex-wrap: wrap;
     gap: 0.4rem;
@@ -312,7 +368,11 @@ const riverLines = Array.from({ length: 9 }, (_, k) => {
     font-size: 0.8125rem;
   }
 
+  /* Pinned to the corner so it never wraps onto its own line. */
   .tile-arrow {
+    position: absolute;
+    right: var(--space-lg);
+    bottom: calc(var(--space-lg) + 0.3rem);
     color: var(--text-secondary);
     transition:
       transform var(--motion-ui) var(--ease-out),
@@ -324,9 +384,30 @@ const riverLines = Array.from({ length: 9 }, (_, k) => {
     transform: translateX(3px);
   }
 
+  /* Mobile: keep tags and the open arrow on one line. */
+  @media (max-width: 479px) {
+    .tile-body {
+      gap: var(--space-md);
+      padding: var(--space-md) var(--space-lg) var(--space-lg);
+    }
+
+    .tile-num {
+      padding-right: var(--space-md);
+      font-size: 1.375rem;
+    }
+
+  }
+
   @media (min-width: 720px) {
     .tiles {
       grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .filters {
+      flex-wrap: wrap;
+      overflow: visible;
+      -webkit-mask-image: none;
+      mask-image: none;
     }
   }
 
@@ -336,3 +417,7 @@ const riverLines = Array.from({ length: 9 }, (_, k) => {
     }
   }
 </style>
+
+<script>
+  import "../scripts/projectAtlas";
+</script>

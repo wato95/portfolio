@@ -455,19 +455,41 @@ p {
 
 /* --------------------------------------------------------------------------
    7. Motion primitives
-   Hooks for PORT-003. Nothing animates yet; these define the vocabulary.
-   `.reveal` is visible by default so content never depends on JavaScript.
+   One reveal mechanism for the whole page (driven by src/scripts/reveal.ts):
+   - [data-reveal]            the element itself reveals when it enters view
+   - [data-reveal-group]      children marked [data-reveal-step] reveal in
+                              sequence, ordered by their --step custom property
+   Content is only hidden once `html.js-reveal` is set, so without JavaScript
+   everything is simply visible.
    -------------------------------------------------------------------------- */
 
-.reveal {
+.js-reveal [data-reveal],
+.js-reveal [data-reveal-group] [data-reveal-step] {
+  opacity: 0;
+  transform: translateY(12px);
   transition:
-    opacity var(--motion-medium) var(--ease-out),
-    transform var(--motion-medium) var(--ease-out);
+    opacity var(--motion-slow) var(--ease-out),
+    transform var(--motion-slow) var(--ease-out);
+  transition-delay: calc(var(--step, 0) * var(--reveal-stagger, 110ms));
+}
+
+.js-reveal [data-reveal].is-visible,
+.js-reveal [data-reveal-group].is-visible [data-reveal-step] {
+  opacity: 1;
+  transform: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+
+  /* Final states immediately; nothing depends on motion to be understood. */
+  .js-reveal [data-reveal],
+  .js-reveal [data-reveal-group] [data-reveal-step] {
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 
   *,
@@ -476,6 +498,7 @@ p {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
   }
 }
 
