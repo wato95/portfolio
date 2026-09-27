@@ -9,10 +9,20 @@ import Journey from "../components/Journey.astro";
 import ProjectAtlas from "../components/ProjectAtlas.astro";
 import Footer from "../components/Footer.astro";
 import { site, withBase } from "../data/site";
+// Preload the primary text face so the hero doesn't swap fonts after first paint.
+import geistLatin from "@fontsource-variable/geist/files/geist-latin-wght-normal.woff2?url";
 
 const canonical = new URL(Astro.url.pathname, Astro.site);
-// TODO(PORT-004): add a real social preview image at /og.png and set this.
-const ogImage: string | undefined = undefined;
+// 1200×630 capture of the real hero (regenerate if the hero changes).
+const ogImage = new URL(withBase("/og.png"), Astro.site);
+
+const person = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: site.name,
+  url: canonical.href,
+  sameAs: [site.githubUrl, site.linkedinUrl].filter(Boolean),
+};
 ---
 
 <!doctype html>
@@ -24,6 +34,8 @@ const ogImage: string | undefined = undefined;
     <meta name="description" content={site.description} />
     <link rel="canonical" href={canonical} />
     <link rel="icon" type="image/svg+xml" href={withBase("/favicon.svg")} />
+    <link rel="apple-touch-icon" href={withBase("/apple-touch-icon.png")} />
+    <link rel="preload" href={geistLatin} as="font" type="font/woff2" crossorigin />
     <meta name="theme-color" content="#05070c" />
     <!--
       Opt in to scroll reveals before first paint. If the reveal module has not
@@ -37,11 +49,16 @@ const ogImage: string | undefined = undefined;
     </script>
 
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.name} />
     <meta property="og:title" content={site.title} />
     <meta property="og:description" content={site.description} />
     <meta property="og:url" content={canonical} />
-    {ogImage && <meta property="og:image" content={new URL(withBase(ogImage), Astro.site)} />}
-    <meta name="twitter:card" content={ogImage ? "summary_large_image" : "summary"} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={`${site.name}: mapping complex systems into products people can use.`} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script type="application/ld+json" set:html={JSON.stringify(person)} />
   </head>
   <body id="top">
     <a class="skip-link" href="#main">Skip to content</a>

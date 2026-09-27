@@ -320,12 +320,6 @@ p {
   margin-bottom: clamp(var(--space-2xl), 5vw, 4.5rem);
 }
 
-/* 4 → 8 → 12 column grid (mobile → tablet → desktop) */
-.grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  column-gap: clamp(1rem, 2.4vw, 2rem);
-}
 
 /* --------------------------------------------------------------------------
    6. Shared controls
@@ -504,17 +498,7 @@ p {
 
 /* --------------------------------------------------------------------------
    8. Responsive primitives
-   default: mobile · 720px tablet · 1024px desktop · 1280px large
+   Mobile-first breakpoints used by every component:
+     720px  tablet · 1024px desktop · 1280px large composition
+   Components set their own column ratios (e.g. 5fr / 7fr) inside these.
    -------------------------------------------------------------------------- */
-
-@media (min-width: 720px) {
-  .grid {
-    grid-template-columns: repeat(8, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 1024px) {
-  .grid {
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-  }
-}
