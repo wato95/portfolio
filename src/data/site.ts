@@ -1,3 +1,14 @@
+import { existsSync } from "node:fs";
+import { join } from "node:path";
+
+/**
+ * CV: drop the PDF at public/cv/charlie-watson-cv.pdf and every CV link on
+ * the site appears automatically. No file → links stay hidden.
+ * Checked at build time (restart `npm run dev` after adding the file).
+ */
+const CV_PATH = "/cv/charlie-watson-cv.pdf";
+const hasCv = existsSync(join(process.cwd(), "public", CV_PATH));
+
 /**
  * Personal identity and contact links.
  *
@@ -15,7 +26,7 @@ export const site = {
   // TODO(PORT-004): supply real values. Undefined = link hidden.
   linkedinUrl: undefined as string | undefined,
   email: undefined as string | undefined,
-  cvUrl: undefined as string | undefined,
+  cvUrl: hasCv ? withBase(CV_PATH) : undefined,
 
   heroTools: ["Python", "SQL", "dbt", "Geospatial", "Data Platforms", "Frontend"],
 };
