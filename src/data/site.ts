@@ -24,8 +24,8 @@ export const site = {
 
   githubUrl: "https://github.com/wato95",
   // TODO(PORT-004): supply real values. Undefined = link hidden.
-  linkedinUrl: undefined as string | undefined,
-  email: undefined as string | undefined,
+  linkedinUrl: "www.linkedin.com/in/charlie-watson-90142b152" as string | undefined,
+  email: "wato95@gmail.com" as string | undefined,
   cvUrl: hasCv ? withBase(CV_PATH) : undefined,
 
   heroTools: ["Python", "SQL", "dbt", "Geospatial", "Data Platforms", "Frontend"],
