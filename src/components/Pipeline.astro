@@ -297,9 +297,13 @@ const barWidth = (value: number, items: { value: number }[]) =>
   }
 
   /* ---- Detail panel ---- */
+  /*
+   * The detail layout responds to the panel's own width (container queries),
+   * not the viewport, so its columns only split when their content fits.
+   */
   .detail {
     position: relative;
-    overflow: hidden;
+    container: detail / inline-size;
     margin-top: var(--space-2xl);
     padding: clamp(1.25rem, 3vw, 2.5rem);
   }
@@ -322,7 +326,7 @@ const barWidth = (value: number, items: { value: number }[]) =>
   }
 
   .playback-bar.is-running span {
-    animation: playback-fill var(--playback-ms, 6000ms) linear forwards;
+    animation: playback-fill var(--playback-ms, 5000ms) linear forwards;
   }
 
   @keyframes playback-fill {
@@ -409,12 +413,14 @@ const barWidth = (value: number, items: { value: number }[]) =>
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md);
     background: rgba(5, 7, 12, 0.35);
+    container-type: inline-size;
   }
 
   .metric dd {
     order: -1; /* value reads first, label beneath */
     margin: 0;
-    font-size: clamp(1.375rem, 2vw, 1.75rem);
+    /* Scales with the tile so values like "99.98%" never outgrow it. */
+    font-size: clamp(1.125rem, 24cqi, 1.75rem);
     font-weight: 500;
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.01em;
@@ -431,19 +437,28 @@ const barWidth = (value: number, items: { value: number }[]) =>
     font-size: var(--text-xs);
   }
 
+  /* Rows share one set of content-sized columns (subgrid), so bars line up. */
   .detail-breakdown ul {
     display: grid;
-    gap: 0.7rem;
+    grid-template-columns: max-content minmax(2.5rem, 1fr) max-content;
+    gap: 0.7rem var(--space-md);
     margin-top: var(--space-md);
   }
 
   .detail-breakdown li {
     display: grid;
-    grid-template-columns: 8.5rem minmax(3rem, 1fr) 4rem; /* fixed tracks keep bars aligned across rows */
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
     align-items: center;
-    gap: var(--space-md);
     font-size: var(--text-sm);
     color: var(--text-secondary);
+  }
+
+  @supports not (grid-template-columns: subgrid) {
+    .detail-breakdown li {
+      grid-template-columns: minmax(0, auto) minmax(2.5rem, 1fr) auto;
+      column-gap: var(--space-md);
+    }
   }
 
   .bd-bar {
@@ -564,8 +579,8 @@ const barWidth = (value: number, items: { value: number }[]) =>
     letter-spacing: 0.1em;
   }
 
-  /* Mobile: metrics read as compact label/value rows. */
-  @media (max-width: 719px) {
+  /* Narrow panel: metrics read as compact label/value rows. */
+  @container detail (width < 36rem) {
     .metric {
       flex-direction: row;
       flex-wrap: wrap;
@@ -586,7 +601,7 @@ const barWidth = (value: number, items: { value: number }[]) =>
     }
   }
 
-  @media (min-width: 720px) {
+  @container detail (width >= 36rem) {
     .detail-metrics {
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }
@@ -603,7 +618,8 @@ const barWidth = (value: number, items: { value: number }[]) =>
     }
   }
 
-  @media (min-width: 1024px) {
+  /* Intro beside metrics; breakdown spans beneath. */
+  @container detail (width >= 52rem) {
     .detail-body {
       grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
       gap: var(--space-2xl);
@@ -612,7 +628,22 @@ const barWidth = (value: number, items: { value: number }[]) =>
     .detail-breakdown {
       grid-column: 1 / -1;
     }
+  }
 
+  /* Three columns only once the breakdown has room for its labels and values. */
+  @container detail (width >= 72rem) {
+    .detail-body {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr) minmax(0, 0.95fr);
+    }
+
+    .detail-breakdown {
+      grid-column: auto;
+      padding-left: var(--space-2xl);
+      border-left: 1px solid var(--border-subtle);
+    }
+  }
+
+  @media (min-width: 1024px) {
     .stages-scroll {
       margin-inline: 0;
       padding-inline: 0;
@@ -623,18 +654,6 @@ const barWidth = (value: number, items: { value: number }[]) =>
       grid-auto-columns: minmax(0, 1fr);
     }
 
-  }
-
-  @media (min-width: 1280px) {
-    .detail-body {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr) minmax(0, 0.95fr);
-    }
-
-    .detail-breakdown {
-      grid-column: auto;
-      padding-left: var(--space-2xl);
-      border-left: 1px solid var(--border-subtle);
-    }
   }
 
   @media (min-width: 1024px) and (max-width: 1279px) {

@@ -13,7 +13,7 @@
  * Reduced motion: no autoplay; stages remain manually selectable.
  */
 
-const INTERVAL_MS = 6000;
+const INTERVAL_MS = 5000;
 
 const root = document.querySelector<HTMLElement>("[data-pipeline]");
 if (root) initPipeline(root);
