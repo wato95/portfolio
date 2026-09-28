@@ -42,166 +42,144 @@ export interface PipelineSnapshot {
   stages: PipelineStage[];
 }
 
+
 export const pipeline: PipelineSnapshot = {
-  isFixture: true,
-  system: "GridPulse",
-  generatedAt: "2026-09-27T14:30:00Z",
-  dataThrough: "2026-09-27T14:29:42Z",
-  defaultStage: "validate",
-  stages: [
+  "isFixture": false,
+  "system": "PulseFoundry / QuakeLens V1",
+  "generatedAt": "2026-09-21T20:49:38.631441Z",
+  "dataThrough": "2026-09-01T00:00:00Z",
+  "defaultStage": "serve",
+  "stages": [
     {
-      id: "source",
-      number: "01",
-      name: "Source",
-      summary: "Authoritative public grid data",
-      title: "Authoritative public sources",
-      explanation:
-        "Each source is registered with its owner, licence and expected cadence, so freshness problems are visible before they reach a product.",
-      metrics: [
-        { label: "Active sources", value: "3" },
-        { label: "Stale sources", value: "0" },
-        { label: "Freshest source", value: "18 s", note: "since last publish" },
+      "id": "source",
+      "number": "01",
+      "name": "Source",
+      "summary": "USGS earthquakes and Census places",
+      "title": "Published public sources",
+      "explanation": "The V1 preview combines USGS earthquake records with 2024 U.S. Census Gazetteer places. Places provide search context, not population exposure.",
+      "metrics": [
+        { "label": "Published sources", "value": "2" },
+        { "label": "Licence records", "value": "2" },
+        { "label": "Place-data vintage", "value": "2024" }
       ],
-      breakdown: {
-        title: "Records by source",
-        items: [
-          { label: "Balancing API", value: 12904, display: "12,904" },
-          { label: "Generation mix", value: 4811, display: "4,811" },
-          { label: "Interconnectors", value: 717, display: "717" },
-        ],
-      },
+      "breakdown": {
+        "title": "Published rows by source",
+        "items": [
+          { "label": "USGS events", "value": 19503, "display": "19,503" },
+          { "label": "Census places", "value": 32333, "display": "32,333" }
+        ]
+      }
     },
     {
-      id: "ingest",
-      number: "02",
-      name: "Ingest",
-      summary: "Scheduled, idempotent collection",
-      title: "Scheduled, idempotent collection",
-      explanation:
-        "Raw payloads are captured exactly as received, hashed and stored with their request metadata. Re-running a window produces the same result.",
-      metrics: [
-        { label: "Records this window", value: "18,432" },
-        { label: "Run duration", value: "41 s" },
-        { label: "Last success", value: "14:29", note: "UTC" },
-      ],
-      breakdown: {
-        title: "Recent run durations",
-        items: [
-          { label: "14:29 run", value: 41, display: "41 s" },
-          { label: "14:24 run", value: 38, display: "38 s" },
-          { label: "14:19 run", value: 44, display: "44 s" },
-        ],
-      },
+      "id": "ingest",
+      "number": "02",
+      "name": "Ingest",
+      "summary": "Completed 2026 event acquisition",
+      "title": "Completed event acquisition",
+      "explanation": "The completed 2026 acquisition covered two catalogue windows and captured details for every targeted event.",
+      "metrics": [
+        { "label": "Catalogue windows", "value": "2" },
+        { "label": "Event details captured", "value": "19,503 / 19,503" },
+        { "label": "Details remaining", "value": "0" }
+      ]
     },
     {
-      id: "validate",
-      number: "03",
-      name: "Validate",
-      summary: "Quality checks and quarantine",
-      title: "Quality checks and quarantine",
-      explanation:
-        "Records are checked for completeness, schema validity and domain rules. Failures are quarantined with a reason instead of silently dropped.",
-      metrics: [
-        { label: "Valid", value: "18,429" },
-        { label: "Quarantined", value: "3" },
-        { label: "Pass rate", value: "99.98%" },
-      ],
-      breakdown: {
-        title: "Top rejection reasons",
-        items: [
-          { label: "Missing field", value: 2 },
-          { label: "Out of range", value: 1 },
-          { label: "Schema mismatch", value: 0 },
-        ],
-      },
+      "id": "validate",
+      "number": "03",
+      "name": "Validate",
+      "summary": "Publication checks and reconciliation",
+      "title": "Validated preview publication",
+      "explanation": "Publication checks reconciled the event count with the completed acquisition and checked event identity, coverage, revision history and daily activity.",
+      "metrics": [
+        { "label": "Events reconciled", "value": "19,503 / 19,503" },
+        { "label": "Duplicate event IDs", "value": "0" },
+        { "label": "Events outside coverage", "value": "0" }
+      ]
     },
     {
-      id: "persist",
-      number: "04",
-      name: "Persist",
-      summary: "Versioned, deduplicated storage",
-      title: "Versioned, deduplicated storage",
-      explanation:
-        "Validated records land in partitioned tables keyed on their natural identifiers, so late or repeated data updates rather than duplicates.",
-      metrics: [
-        { label: "Rows written", value: "18,429" },
-        { label: "Duplicates removed", value: "112" },
-        { label: "Late updates", value: "9" },
+      "id": "persist",
+      "number": "04",
+      "name": "Persist",
+      "summary": "Archived event and product evidence",
+      "title": "Persisted source evidence",
+      "explanation": "The acquisition retained event revisions, product revisions and product-content records before building the public preview.",
+      "metrics": [
+        { "label": "Event-revision rows", "value": "39,006" },
+        { "label": "Product-revision rows", "value": "64,562" },
+        { "label": "Product-content rows", "value": "346,880" }
       ],
-      breakdown: {
-        title: "Rows by table",
-        items: [
-          { label: "balancing", value: 12901, display: "12,901" },
-          { label: "generation", value: 4811, display: "4,811" },
-          { label: "flows", value: 717, display: "717" },
-        ],
-      },
+      "breakdown": {
+        "title": "Archived rows by type",
+        "items": [
+          { "label": "Event revisions", "value": 39006, "display": "39,006" },
+          { "label": "Product revisions", "value": 64562, "display": "64,562" },
+          { "label": "Product contents", "value": 346880, "display": "346,880" }
+        ]
+      }
     },
     {
-      id: "transform",
-      number: "05",
-      name: "Transform",
-      summary: "Tested models and analytical views",
-      title: "Tested models and analytical views",
-      explanation:
-        "dbt models turn raw records into documented analytical views. Every model carries tests, and a failing test blocks publication.",
-      metrics: [
-        { label: "Models updated", value: "14" },
-        { label: "Tests passed", value: "62 / 62" },
-        { label: "Duration", value: "27 s" },
+      "id": "transform",
+      "number": "05",
+      "name": "Transform",
+      "summary": "Event, history and activity models",
+      "title": "Built analytical views",
+      "explanation": "The preview models produce one latest row per event, captured display-state history and daily activity. Captured states do not claim to include every USGS update.",
+      "metrics": [
+        { "label": "Latest events", "value": "19,503" },
+        { "label": "Captured states", "value": "19,537" },
+        { "label": "Activity dates", "value": "243" }
       ],
-      breakdown: {
-        title: "Slowest models",
-        items: [
-          { label: "int_settlement", value: 9, display: "9 s" },
-          { label: "mart_prices", value: 7, display: "7 s" },
-          { label: "stg_balancing", value: 4, display: "4 s" },
-        ],
-      },
+      "breakdown": {
+        "title": "Published analytical rows",
+        "items": [
+          { "label": "Events", "value": 19503, "display": "19,503" },
+          { "label": "Captured states", "value": 19537, "display": "19,537" },
+          { "label": "Daily activity", "value": 243, "display": "243" }
+        ]
+      }
     },
     {
-      id: "serve",
-      number: "06",
-      name: "Serve",
-      summary: "Published static artifacts",
-      title: "Published static artifacts",
-      explanation:
-        "Outputs are published as immutable, versioned files behind a small manifest, so products read a known-good snapshot instead of a live database.",
-      metrics: [
-        { label: "Artifacts published", value: "6" },
-        { label: "Formats", value: "2", note: "Parquet + JSON" },
-        { label: "Manifest", value: "v214" },
+      "id": "serve",
+      "number": "06",
+      "name": "Serve",
+      "summary": "Immutable static preview artifacts",
+      "title": "Published static artifacts",
+      "explanation": "QuakeLens Web V1 uses immutable build 20260921T204938Z-a14edef9b000. Its four Parquet files contain event and place data, but no published shaking or exposure results.",
+      "metrics": [
+        { "label": "Parquet artifacts", "value": "4" },
+        { "label": "Artifact bytes", "value": "3,123,122" },
+        { "label": "Preview schema", "value": "v1" }
       ],
-      breakdown: {
-        title: "Largest artifacts",
-        items: [
-          { label: "prices.parquet", value: 2400, display: "2.4 MB" },
-          { label: "flows.parquet", value: 1100, display: "1.1 MB" },
-          { label: "summary.json", value: 90, display: "90 KB" },
-        ],
-      },
+      "breakdown": {
+        "title": "Artifact sizes",
+        "items": [
+          { "label": "events.parquet", "value": 1259751, "display": "1,259,751 B" },
+          { "label": "revisions.parquet", "value": 1240842, "display": "1,240,842 B" },
+          { "label": "places.parquet", "value": 620774, "display": "620,774 B" },
+          { "label": "daily.parquet", "value": 1755, "display": "1,755 B" }
+        ]
+      }
     },
     {
-      id: "interface",
-      number: "07",
-      name: "Interface",
-      summary: "Products people actually use",
-      title: "Products people actually use",
-      explanation:
-        "The interface reads the published manifest, shows how fresh its data is, and degrades gracefully when the pipeline is behind.",
-      metrics: [
-        { label: "Data freshness", value: "< 1 min" },
-        { label: "Serving manifest", value: "v214" },
-        { label: "Open incidents", value: "0" },
+      "id": "interface",
+      "number": "07",
+      "name": "Interface",
+      "summary": "A static earthquake browser",
+      "title": "QuakeLens Web V1",
+      "explanation": "The browser presents the published earthquakes, daily activity and searchable Census places from the pinned preview build.",
+      "metrics": [
+        { "label": "Browsable events", "value": "19,503" },
+        { "label": "Activity dates", "value": "243" },
+        { "label": "Searchable places", "value": "32,333" }
       ],
-      breakdown: {
-        title: "Data age by view",
-        items: [
-          { label: "Flows", value: 58, display: "58 s" },
-          { label: "Overview", value: 42, display: "42 s" },
-          { label: "Prices", value: 42, display: "42 s" },
-        ],
-      },
-    },
-  ],
-};
+      "breakdown": {
+        "title": "Browser datasets",
+        "items": [
+          { "label": "Events", "value": 19503, "display": "19,503" },
+          { "label": "Places", "value": 32333, "display": "32,333" },
+          { "label": "Activity dates", "value": 243, "display": "243" }
+        ]
+      }
+    }
+  ]
+}
