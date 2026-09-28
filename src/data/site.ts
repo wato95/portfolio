@@ -27,7 +27,7 @@ export const site = {
   email: "wato95@gmail.com" as string | undefined,
   cvUrl: hasCv ? withBase(CV_PATH) : undefined,
 
-  heroTools: ["Python", "SQL", "dbt", "Geospatial", "Data Platforms", "Frontend"],
+  heroTools: ["Python", "SQL", "dbt", "Apache Airflow", "AWS (S3 · EC2 · Redshift)", "Docker", "Data modelling", "Data quality & testing"],
 };
 
 /** Prefix a root-relative path with the deployed base path (GitHub Pages). */
