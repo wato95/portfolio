@@ -18,7 +18,7 @@ export const journey = {
     entries: [
       {
         dates: "2026 - Present",
-        organisation: "Independent",
+        organisation: "Personal projects",
         role: "Data & product engineering",
         summary:
           "Building QuakeLens, PulseFoundry and GridPulse end to end: pipelines, models, published artifacts and the interfaces on top.",
