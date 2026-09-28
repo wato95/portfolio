@@ -23,7 +23,7 @@ export const site = {
     "Portfolio of Charlie Watson: data engineering, analytical products and interactive interfaces built around real-world data.",
 
   githubUrl: "https://github.com/wato95",
-  linkedinUrl: "https://www.linkedin.com/in/charlie-watson-90142b152" as string | undefined,
+  linkedinUrl: "https://www.linkedin.com/in/charliewatson-data" as string | undefined,
   email: "wato95@gmail.com" as string | undefined,
   cvUrl: hasCv ? withBase(CV_PATH) : undefined,
 
