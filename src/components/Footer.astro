@@ -35,12 +35,13 @@ const year = new Date().getFullYear();
         <p class="eyebrow"><span class="num">07</span> / Contact</p>
         <p class="contact-kicker">Get in touch <span aria-hidden="true">/</span></p>
         <h2 id="contact-title" class="contact-title">
-          Let’s talk about data, systems or something that <span class="accent">needs a map</span>.
+          Let’s talk about data, systems or a <span class="accent">pipeline that needs to be trusted</span>.
         </h2>
       </div>
 
       <nav class="contact-links" aria-labelledby="contact-links-title" data-reveal style="--step: 2">
-        <p id="contact-links-title" class="contact-links-title mono">Find me online</p>
+        <p id="contact-links-title" class="contact-links-title mono">Open to senior data engineering roles in London or remote in the EU.</p>
+        <p id="contact-links-title" class="contact-links-title mono">Find me online: </p>
         <ul role="list">
           {links.map((link) => (
             <li>
@@ -123,6 +124,7 @@ const year = new Date().getFullYear();
   .contact-links-title {
     color: var(--text-secondary);
     letter-spacing: 0.18em;
+    margin-bottom: 20px;
   }
 
   .contact-links ul {
